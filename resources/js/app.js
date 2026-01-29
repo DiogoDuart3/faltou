@@ -14,17 +14,14 @@ const OUTAGE_META = {
     },
 };
 
-const RATE_LIMITS = {
-    report: { windowMs: 5 * 60 * 1000, max: 1 },
-    comment: { windowMs: 3 * 60 * 1000, max: 3 },
-};
-
 const GEO_CACHE_KEY = 'faltou:geocode-cache';
 const DEFAULT_LOCALITY_LABEL = 'Localidade desconhecida';
 const MAX_NOTE_LENGTH = 160;
 const MAX_COMMENT_LENGTH = 140;
 const API_BASE = '/api';
 
+const reportKey = (type) => `faltou:reports:${type}`;
+const commentKey = (type) => `faltou:comments:${type}`;
 const pendingReportKey = (type) => `faltou:reports:pending:${type}`;
 const pendingCommentKey = (type) => `faltou:comments:pending:${type}`;
 const storage = {
@@ -131,41 +128,22 @@ const apiRequest = async (path, options = {}) => {
     });
 
     if (!response.ok) {
-        const error = new Error(`API ${response.status}`);
+        let message = `API ${response.status}`;
+        try {
+            const data = await response.json();
+            if (data && data.message) {
+                message = data.message;
+            }
+        } catch (e) {
+        }
+        const error = new Error(message);
         error.status = response.status;
         throw error;
     }
 
-
     return response.json();
 };
 
-const rateKey = (action, type) => `faltou:rate:${action}:${type}`;
-
-const formatWait = (waitMs) => {
-    const seconds = Math.ceil(waitMs / 1000);
-    if (seconds < 60) {
-        return `${seconds}s`;
-    }
-    const minutes = Math.ceil(seconds / 60);
-    return `${minutes} min`;
-};
-
-const checkRateLimit = (action, type) => {
-    const limit = RATE_LIMITS[action];
-    if (!limit) {
-        return { allowed: true };
-    }
-    const now = Date.now();
-    const recent = storage.read(rateKey(action, type)).filter((timestamp) => now - timestamp < limit.windowMs);
-    if (recent.length >= limit.max) {
-        const waitMs = Math.max(limit.windowMs - (now - recent[0]), 0);
-        return { allowed: false, waitMs };
-    }
-    recent.push(now);
-    storage.write(rateKey(action, type), recent);
-    return { allowed: true };
-};
 
 const getStoredReports = (type) => {
     const cached = storage.read(reportKey(type)).map(normalizeReport);
@@ -791,18 +769,6 @@ const setupOutagePage = () => {
                 }
                 return;
             }
-            const rate = checkRateLimit('report', type);
-            if (!rate.allowed) {
-                if (status) {
-                    status.textContent = `Aguarde ${formatWait(rate.waitMs)} antes de enviar outro aviso.`;
-                    status.className = 'text-xs text-ember font-medium';
-                }
-                if (submitBtn) {
-                    submitBtn.disabled = false;
-                    submitBtn.textContent = originalBtnText;
-                }
-                return;
-            }
             const noteValue = noteInput?.value.trim() ?? '';
             if (noteValue.length > MAX_NOTE_LENGTH) {
                 if (status) {
@@ -941,18 +907,6 @@ const setupOutagePage = () => {
             if (value.length > MAX_COMMENT_LENGTH) {
                 if (commentStatus) {
                     commentStatus.textContent = `Comentário demasiado longo. Máximo ${MAX_COMMENT_LENGTH} caracteres.`;
-                    commentStatus.className = 'text-xs text-ember font-medium';
-                }
-                if (submitBtn) {
-                    submitBtn.disabled = false;
-                    submitBtn.textContent = originalBtnText;
-                }
-                return;
-            }
-            const rate = checkRateLimit('comment', type);
-            if (!rate.allowed) {
-                if (commentStatus) {
-                    commentStatus.textContent = `Aguarde ${formatWait(rate.waitMs)} antes de comentar novamente.`;
                     commentStatus.className = 'text-xs text-ember font-medium';
                 }
                 if (submitBtn) {
