@@ -1,0 +1,21 @@
+{
+  "name": "Faltou - Alertas de Falhas",
+  "short_name": "Faltou",
+  "description": "Alertas comunitários de falhas de luz e água em Portugal.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f8f4ec",
+  "theme_color": "#1f1b16",
+  "icons": [
+    {
+      "src": "/favicon.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/images/icon.png",
+      "sizes": "1024x1024",
+      "type": "image/png"
+    }
+  ]
+}

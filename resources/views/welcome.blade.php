@@ -6,6 +6,27 @@
     'Partilha avisos de falta de eletricidade e água com localização rápida e visibilidade por 24 horas.'
 )
 
+@push('head')
+    <link
+        rel="stylesheet"
+        href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+        crossorigin=""
+    />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
+@endpush
+
+@push('scripts')
+    <script
+        src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+        crossorigin=""
+        defer
+    ></script>
+    <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js" defer></script>
+@endpush
+
 @section('content')
     <section class="mx-auto w-full max-w-6xl px-6 pb-16 pt-14">
         <div class="grid gap-10 lg:grid-cols-[1.1fr_0.9fr]">
@@ -109,6 +130,17 @@
                 </p>
             </div>
             <a class="btn btn-secondary" href="{{ url('/falta-eletricidade') }}">Criar novo aviso</a>
+        </div>
+        <div class="card mt-6 space-y-4">
+            <div>
+                <h3 class="font-display text-2xl">Mapa de avisos</h3>
+                <p class="mt-2 text-xs text-ink/60">Toque num ponto para ver a localidade.</p>
+            </div>
+            <div class="map map--lg" data-report-map data-map-scope="all"></div>
+            <div class="map-legend">
+                <span class="legend-item"><span class="legend-dot legend-power"></span> Eletricidade</span>
+                <span class="legend-item"><span class="legend-dot legend-water"></span> Água</span>
+            </div>
         </div>
         <div class="mt-6 grid gap-4" data-report-feed>
             <div class="empty-state">Ainda não existem avisos nas últimas 24 horas.</div>

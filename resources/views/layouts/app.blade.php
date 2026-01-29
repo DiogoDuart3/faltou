@@ -29,6 +29,10 @@
         <meta name="twitter:description" content="{{ $seoDescription }}">
         <meta name="twitter:image" content="{{ $seoImage }}">
 
+        <link rel="icon" type="image/png" href="{{ asset('favicon.png') }}">
+        <link rel="apple-touch-icon" href="{{ asset('images/icon.png') }}">
+        <link rel="manifest" href="{{ asset('manifest.json') }}">
+
         <link rel="preconnect" href="https://fonts.bunny.net">
         <link href="https://fonts.bunny.net/css?family=space-grotesk:400,500,600,700|fraunces:400,600,700" rel="stylesheet" />
 
@@ -44,7 +48,7 @@
             <header class="relative z-10 border-b border-ink/10">
                 <div class="mx-auto flex w-full max-w-6xl items-center justify-between px-6 py-5">
                     <a href="{{ url('/') }}" class="flex items-center gap-3">
-                        <span class="flex h-10 w-10 items-center justify-center rounded-2xl bg-ink text-porcelain text-lg font-semibold">F</span>
+                        <img src="{{ asset('images/icon.png') }}" alt="Faltou" class="h-10 w-10 rounded-xl object-cover shadow-sm">
                         <div class="leading-none">
                             <div class="font-display text-xl">Faltou</div>
                             <div class="text-xs uppercase tracking-[0.24em] text-ink/60">Portugal</div>

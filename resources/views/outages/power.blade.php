@@ -10,6 +10,8 @@
         integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
         crossorigin=""
     />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
 @endpush
 
 @push('scripts')
@@ -19,6 +21,7 @@
         crossorigin=""
         defer
     ></script>
+    <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js" defer></script>
 @endpush
 
 @section('content')
@@ -73,6 +76,12 @@
             </div>
 
             <div class="space-y-6">
+                <div class="card">
+                    <h2 class="font-display text-2xl">Mapa de avisos</h2>
+                    <p class="mt-2 text-xs text-ink/60">Mostra relatos de falta de eletricidade nas últimas 24 horas.</p>
+                    <div class="mt-4 map map--lg" data-report-map data-map-scope="power"></div>
+                    <div class="mt-3 text-xs text-ink/60">Toque num ponto para ver a localidade.</div>
+                </div>
                 <div class="card">
                     <h2 class="font-display text-2xl">Avisos ativos (24h)</h2>
                     <p class="mt-2 text-xs text-ink/60">Mostra apenas relatos recentes para manter a informação atual.</p>
