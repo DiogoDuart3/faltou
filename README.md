@@ -1,59 +1,69 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Faltou 💡🚰
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+**Faltou** is a community-driven platform for reporting and tracking power and water outages across Portugal. Built with speed, resilience, and simplicity in mind, it helps communities react faster to service disruptions even in areas with unstable connectivity.
 
-## About Laravel
+![Faltou Social Preview](public/images/og-card.png)
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## 📌 Features
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+- **Quick Reports**: Easily report electricity or water outages with just a few clicks.
+- **Real-time Map**: Visualize active incidents across the country.
+- **24-Hour Lifecycle**: Alerts are automatically archived after 24 hours to ensure the data remains fresh and relevant.
+- **Connection Resilience**: Designed to work under poor network conditions using local caching and lightweight map implementations.
+- **Privacy First**: No mandatory registration. Share only what's necessary to help others.
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## 🛠️ Tech Stack
 
-## Learning Laravel
+- **Framework**: [Laravel 12](https://laravel.com)
+- **Styling**: [Tailwind CSS v4](https://tailwindcss.com)
+- **Frontend Tooling**: [Vite](https://vitejs.dev)
+- **Testing**: [Pest PHP](https://pestphp.com)
+- **Deployment**: Optimized for standard PHP/Laravel environments.
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+## 🚀 Getting Started
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+### Prerequisites
 
-## Laravel Sponsors
+- PHP 8.2 or higher
+- Composer
+- Node.js & NPM
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+### Installation
 
-### Premium Partners
+1. **Clone the repository**:
+   ```bash
+   git clone https://github.com/your-username/faltou.git
+   cd faltou
+   ```
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+2. **Run the setup script**:
+   The project includes a convenient setup script that handles composer installation, environment configuration, key generation, migrations, and asset building.
+   ```bash
+   composer run setup
+   ```
 
-## Contributing
+3. **Start the development servers**:
+   ```bash
+   composer run dev
+   ```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+## 📖 Development Commands
 
-## Code of Conduct
+- `composer run dev`: Starts all necessary services (Vite, Laravel server, queue listener, logs).
+- `composer run test`: Runs the Pest test suite.
+- `npm run build`: Compiles assets for production.
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+## 🇵🇹 Sobre o Projeto (PT-PT)
 
-## Security Vulnerabilities
+O **Faltou** é uma rede comunitária de alertas de falhas de luz e água em Portugal. 
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+### Como funciona?
+1. **Localização**: Autorize o GPS ou marque manualmente no mapa.
+2. **Aviso Rápido**: Partilhe o que faltou (eletricidade ou água).
+3. **Comunidade**: Os alertas ficam visíveis durante 24 horas para dar contexto a quem está por perto.
 
-## License
+Criado para funcionar em redes fracas, o sistema utiliza dados locais e mapas leves para garantir que a informação chega a quem precisa, mesmo em situações críticas.
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+## 📄 License
+
+This project is open-sourced software licensed under the [MIT license](LICENSE).
