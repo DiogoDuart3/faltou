@@ -25,6 +25,16 @@
         defer
     ></script>
     <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js" defer></script>
+    @push('schema')
+    <script type="application/ld+json">
+    {
+      "@@context": "https://schema.org",
+      "@@type": "WebSite",
+      "name": "Faltou",
+      "url": "{{ url('/') }}"
+    }
+    </script>
+    @endpush
 @endpush
 
 @section('content')
