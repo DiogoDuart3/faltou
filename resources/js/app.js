@@ -196,10 +196,22 @@ const savePendingReport = (type, payload) => {
     storage.write(pendingReportKey(type), pending.filter(within24h));
 };
 
+const removePendingReport = (type, id) => {
+    const pending = storage.read(pendingReportKey(type));
+    const filtered = pending.filter((r) => (r.id ?? r.uuid) !== id);
+    storage.write(pendingReportKey(type), filtered);
+};
+
 const savePendingComment = (type, payload) => {
     const pending = storage.read(pendingCommentKey(type));
     pending.unshift({ ...payload, pending: true });
     storage.write(pendingCommentKey(type), pending.filter(within24h));
+};
+
+const removePendingComment = (type, id) => {
+    const pending = storage.read(pendingCommentKey(type));
+    const filtered = pending.filter((c) => c.id !== id);
+    storage.write(pendingCommentKey(type), filtered);
 };
 
 const syncPendingReports = async () => {
@@ -530,43 +542,78 @@ const refreshReportMaps = async () => {
     if (reportMapRegistry.size === 0) {
         return;
     }
-    const powerReports = await hydrateReports('power', getStoredReports('power'));
-    const waterReports = await hydrateReports('water', getStoredReports('water'));
-    const allReports = [...powerReports, ...waterReports].filter(within24h);
 
-    reportMapRegistry.forEach(({ map, layer, scope }) => {
-        layer.clearLayers();
-        let reports = allReports;
-        if (scope === 'power') {
-            reports = powerReports;
-        } else if (scope === 'water') {
-            reports = waterReports;
-        }
+    if (window._mapRefreshing) {
+        window._mapNeedsRefresh = true;
+        return;
+    }
 
-        if (!reports.length) {
-            map.setView([DEFAULT_CENTER.lat, DEFAULT_CENTER.lng], 6);
-            return;
-        }
+    window._mapRefreshing = true;
+    window._mapNeedsRefresh = false;
 
-        const bounds = [];
-        reports.forEach((report) => {
-            const color = report.type === 'water' ? '#4f7f89' : '#f06b36';
-            const marker = window.L.circleMarker([report.lat, report.lng], {
-                radius: 8,
-                color,
-                fillColor: color,
-                fillOpacity: 0.9,
-                weight: 2,
+    try {
+        const powerReports = await hydrateReports('power', getStoredReports('power'));
+        const waterReports = await hydrateReports('water', getStoredReports('water'));
+        const allReports = [...powerReports, ...waterReports];
+
+        reportMapRegistry.forEach(({ map, layer, scope }) => {
+            layer.clearLayers();
+            let reports = allReports;
+            if (scope === 'power') {
+                reports = powerReports;
+            } else if (scope === 'water') {
+                reports = waterReports;
+            }
+
+            if (!reports.length) {
+                map.setView([DEFAULT_CENTER.lat, DEFAULT_CENTER.lng], 6);
+                return;
+            }
+
+            const bounds = [];
+            const markers = [];
+
+            reports.forEach((report) => {
+                if (typeof report.lat !== 'number' || typeof report.lng !== 'number' ||
+                    isNaN(report.lat) || isNaN(report.lng)) {
+                    return;
+                }
+
+                const color = report.type === 'water' ? '#4f7f89' : '#f06b36';
+                const marker = window.L.circleMarker([report.lat, report.lng], {
+                    radius: 10,
+                    color: '#ffffff',
+                    fillColor: color,
+                    fillOpacity: 1,
+                    weight: 3,
+                    className: 'map-marker-vibrant'
+                });
+
+                marker.bindPopup(createPopupContent(report));
+                markers.push(marker);
+                bounds.push([report.lat, report.lng]);
             });
-            layer.addLayer(marker);
-            marker.bindPopup(createPopupContent(report));
-            bounds.push([report.lat, report.lng]);
-        });
 
-        if (bounds.length) {
-            map.fitBounds(bounds, { padding: [32, 32], maxZoom: 12 });
+            if (markers.length > 0) {
+                if (layer.addLayers) {
+                    layer.addLayers(markers);
+                } else {
+                    markers.forEach(m => layer.addLayer(m));
+                }
+            }
+
+            if (bounds.length) {
+                map.fitBounds(bounds, { padding: [40, 40], maxZoom: 12 });
+            }
+        });
+    } catch (error) {
+        console.error('Error refreshing maps:', error);
+    } finally {
+        window._mapRefreshing = false;
+        if (window._mapNeedsRefresh) {
+            refreshReportMaps();
         }
-    });
+    }
 };
 
 const updateCounts = () => {
@@ -600,9 +647,16 @@ const setupHomeFeed = async () => {
     if (!container) {
         return;
     }
-    const powerReports = await hydrateReports('power', await loadReports('power'));
-    const waterReports = await hydrateReports('water', await loadReports('water'));
-    const reports = [...powerReports, ...waterReports]
+    const powerReports = await loadReports('power');
+    const waterReports = await loadReports('water');
+
+    // Hydrate all at once before rendering
+    const [hPower, hWater] = await Promise.all([
+        hydrateReports('power', powerReports),
+        hydrateReports('water', waterReports)
+    ]);
+
+    const reports = [...hPower, ...hWater]
         .filter(within24h)
         .sort((a, b) => b.createdAt - a.createdAt);
 
@@ -792,6 +846,7 @@ const setupOutagePage = () => {
                 locality = await resolveLocality(lat, lng);
             }
             const payload = {
+                id: generateId(),
                 type,
                 lat,
                 lng,
@@ -801,6 +856,13 @@ const setupOutagePage = () => {
                 locality,
                 createdAt: Date.now(),
             };
+
+            // Optimistic update
+            savePendingReport(type, payload);
+            if (noteInput) noteInput.value = '';
+            await refreshReports();
+            updateCounts();
+            setupHomeFeed();
 
             let savedRemotely = false;
             let blockedByServer = false;
@@ -825,6 +887,7 @@ const setupOutagePage = () => {
                         }),
                     });
                     const normalized = normalizeReport(response);
+                    removePendingReport(type, payload.id);
                     const cached = storage.read(reportKey(type)).map(normalizeReport);
                     storage.write(reportKey(type), mergeByCreatedAt([normalized, ...cached]));
                     savedRemotely = true;
@@ -852,10 +915,6 @@ const setupOutagePage = () => {
                 return;
             }
 
-            if (!savedRemotely) {
-                savePendingReport(type, { id: generateId(), ...payload });
-            }
-            if (noteInput) noteInput.value = '';
             if (status) {
                 if (savedRemotely) {
                     status.textContent = 'Aviso publicado com sucesso. Obrigado por ajudar.';
@@ -927,6 +986,11 @@ const setupOutagePage = () => {
                 createdAt: Date.now(),
             };
 
+            // Optimistic update
+            savePendingComment(type, payload);
+            if (commentText) commentText.value = '';
+            await refreshComments();
+
             let savedRemotely = false;
             let blockedByServer = false;
             let retryCount = 0;
@@ -945,6 +1009,7 @@ const setupOutagePage = () => {
                         }),
                     });
                     const normalized = normalizeComment(response);
+                    removePendingComment(type, payload.id);
                     const cached = storage.read(commentKey(type)).map(normalizeComment);
                     storage.write(commentKey(type), mergeByCreatedAt([normalized, ...cached]));
                     savedRemotely = true;
@@ -972,10 +1037,6 @@ const setupOutagePage = () => {
                 return;
             }
 
-            if (!savedRemotely) {
-                savePendingComment(type, payload);
-            }
-            if (commentText) commentText.value = '';
             if (commentStatus) {
                 if (savedRemotely) {
                     commentStatus.textContent = 'Comentário enviado com sucesso.';

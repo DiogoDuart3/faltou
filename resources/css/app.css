@@ -160,6 +160,15 @@
     .empty-state {
         @apply rounded-2xl border border-dashed border-ink/20 bg-white/60 p-4 text-sm text-ink/60;
     }
+
+    .map-marker-vibrant {
+        filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+        transition: transform 0.2s ease-in-out;
+    }
+
+    .map-marker-vibrant:hover {
+        transform: scale(1.1);
+    }
 }
 
 @layer utilities {
