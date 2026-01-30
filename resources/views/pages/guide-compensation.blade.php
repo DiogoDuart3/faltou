@@ -95,7 +95,7 @@
                     <li>Descrição dos danos e provas recolhidas.</li>
                 </ul>
                 <div class="mt-6">
-                    <a href="https://www.e-redes.pt/pt-pt/podemos-ajudar/pedidos-de-indemnizacao" target="_blank" rel="noopener noreferrer" class="btn btn-primary">Formulário E-Redes &rarr;</a>
+                    <a href="https://balcaodigital.e-redes.pt/requests/connection/losses" target="_blank" rel="noopener noreferrer" class="btn btn-primary">Formulário E-Redes &rarr;</a>
                 </div>
             </div>
 
