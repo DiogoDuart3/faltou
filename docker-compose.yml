@@ -1,0 +1,171 @@
+# Deployed by Coolify as an Application (build pack: Docker Compose).
+#
+# Secrets are NOT in this file by design — they are ${PLACEHOLDERS} filled from
+# Coolify's Environment Variables for this resource. The previous Service-based
+# compose carried APP_KEY, DB_PASSWORD, DB_ROOT_PASSWORD and REDIS_PASSWORD in
+# plaintext; committing that here would have put them in git history forever.
+#
+# So this file is deliberately incomplete on its own. `docker compose up` from a
+# bare checkout will not work without those variables set.
+
+x-app-env: &app-env
+  APP_ENV: production
+  APP_KEY: ${APP_KEY}
+  APP_URL: https://faltou.pt
+  APP_NAME: Faltou
+  APP_DEBUG: 'false'
+  APP_LOCALE: pt
+  APP_FALLBACK_LOCALE: en
+  APP_FAKER_LOCALE: pt_PT
+  APP_MAINTENANCE_DRIVER: file
+  BCRYPT_ROUNDS: '12'
+  LOG_CHANNEL: stack
+  LOG_STACK: single
+  LOG_LEVEL: debug
+  LOG_DEPRECATIONS_CHANNEL: 'null'
+  DB_CONNECTION: mysql
+  DB_HOST: db
+  DB_PORT: '3306'
+  DB_DATABASE: faltou
+  DB_USERNAME: faltou-user
+  DB_PASSWORD: ${DB_PASSWORD}
+  DB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+  SESSION_DRIVER: database
+  SESSION_LIFETIME: '120'
+  SESSION_ENCRYPT: 'false'
+  SESSION_PATH: /
+  SESSION_DOMAIN: 'null'
+  BROADCAST_CONNECTION: log
+  FILESYSTEM_DISK: local
+  QUEUE_CONNECTION: database
+  CACHE_STORE: database
+  MEMCACHED_HOST: 127.0.0.1
+  REDIS_CLIENT: phpredis
+  REDIS_HOST: redis
+  REDIS_PORT: '6379'
+  REDIS_PASSWORD: ${REDIS_PASSWORD}
+  MAIL_MAILER: log
+  MAIL_SCHEME: 'null'
+  MAIL_HOST: 127.0.0.1
+  MAIL_PORT: '2525'
+  MAIL_USERNAME: 'null'
+  MAIL_PASSWORD: 'null'
+  MAIL_FROM_ADDRESS: hello@example.com
+  MAIL_FROM_NAME: Faltou
+  AWS_ACCESS_KEY_ID: ''
+  AWS_SECRET_ACCESS_KEY: ''
+  AWS_DEFAULT_REGION: us-east-1
+  AWS_BUCKET: ''
+  AWS_USE_PATH_STYLE_ENDPOINT: 'false'
+  # Vite freezes VITE_* at BUILD time. A missing one silently ships wrong
+  # client-side config rather than failing — that is how a sibling app shipped
+  # a literal "${APP_NAME}" in its <title>.
+  VITE_APP_NAME: Faltou
+
+x-app-base: &app-base
+  build:
+    context: .
+    dockerfile: Dockerfile
+  restart: unless-stopped
+  entrypoint:
+    - docker-php-serversideup-entrypoint
+  volumes:
+    - '/home/ubuntu/migrations/faltou/storage:/var/www/html/storage/app'
+
+services:
+  app:
+    <<: *app-base
+    command:
+      - /init
+    environment:
+      <<: *app-env
+      PORT: '8080'
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - 'curl -fsS -m 5 -o /dev/null http://127.0.0.1:8080/ || exit 1'
+      interval: 30s
+      timeout: 5s
+      start_period: 60s
+      retries: 3
+
+  queue:
+    <<: *app-base
+    command:
+      - sh
+      - '-c'
+      - 'php artisan queue:work --tries=3 --timeout=90'
+    environment:
+      <<: *app-env
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - "pgrep -f 'queue:work' > /dev/null || exit 1"
+      interval: 30s
+      timeout: 5s
+      start_period: 30s
+      retries: 3
+
+  scheduler:
+    <<: *app-base
+    command:
+      - sh
+      - '-c'
+      - 'php artisan schedule:work'
+    environment:
+      <<: *app-env
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - "pgrep -f 'schedule:work' > /dev/null || exit 1"
+      interval: 30s
+      timeout: 5s
+      start_period: 30s
+      retries: 3
+
+  db:
+    image: 'mysql:8.4'
+    restart: unless-stopped
+    command:
+      - mysqld
+    environment:
+      MYSQL_DATABASE: faltou
+      MYSQL_USER: faltou-user
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+    volumes:
+      - 'faltou_db_data:/var/lib/mysql'
+    healthcheck:
+      # No variables: docker compose would interpolate them against the HOST
+      # environment and send an empty password to the container.
+      test:
+        - CMD-SHELL
+        - 'mysqladmin ping -h 127.0.0.1 --silent'
+      interval: 30s
+      timeout: 5s
+      start_period: 60s
+      retries: 3
+
+  redis:
+    image: 'redis:7-alpine'
+    restart: unless-stopped
+    command:
+      - sh
+      - '-c'
+      - 'redis-server --requirepass ${REDIS_PASSWORD} --appendonly yes'
+    volumes:
+      - 'faltou_redis_data:/data'
+    healthcheck:
+      # NOAUTH proves the server is alive and answering; a dead redis says
+      # "Could not connect". Keeps the password out of the healthcheck.
+      test:
+        - CMD-SHELL
+        - 'redis-cli ping 2>&1 | grep -qE "PONG|NOAUTH"'
+      interval: 30s
+      timeout: 5s
+      start_period: 20s
+      retries: 3
+
+volumes:
+  faltou_db_data:
+  faltou_redis_data:
