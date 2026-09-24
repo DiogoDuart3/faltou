@@ -1,4 +1,4 @@
-const CACHE_NAME = 'faltou-v1';
+const CACHE_NAME = 'faltou-v2';
 const CORE_ASSETS = ['/', '/falta-eletricidade', '/falta-agua'];
 
 self.addEventListener('install', (event) => {

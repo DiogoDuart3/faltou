@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('layouts.guide')
 
 @section('title', 'O que fazer quando falta a água? Guia prático - Faltou')
 @section('description', 'Saiba o que fazer em caso de corte de água. Dicas de higiene, como verificar avisos da companhia e reportar à comunidade.')
@@ -52,65 +52,76 @@
 </script>
 @endpush
 
-@section('content')
-<section class="max-w-4xl px-6 py-12 mx-auto">
-    <div class="mb-10">
-        <a href="{{ url('/') }}" class="text-sm font-medium hover:underline text-ink/60">&larr; Voltar ao início</a>
-        <h1 class="mt-4 text-4xl font-semibold leading-tight md:text-5xl">O que fazer quando falta a água?</h1>
-        <p class="mt-4 text-xl text-ink/70">Dicas essenciais para lidar com cortes de abastecimento.</p>
-    </div>
+@section('guide-icon', 'droplet')
+@section('guide-tone', 'river')
+@section('guide-heading', 'O que fazer quando falta a água?')
+@section('guide-lead', 'Dicas essenciais para lidar com cortes de abastecimento.')
 
-    <div class="grid gap-10 md:grid-cols-[1fr_300px]">
-        
-        <div class="space-y-8 text-lg leading-relaxed text-ink/80">
-            
-            <div>
-                <h2 class="mb-4 text-2xl font-semibold text-ink">1. Identifique a causa</h2>
-                <p>Verifique se tem alguma torneira de segurança fechada em casa (geralmente junto ao contador). Se não for o caso, veja se os vizinhos têm o mesmo problema ou se há obras na rua.</p>
-            </div>
-
-            <div>
-                <h2 class="mb-4 text-2xl font-semibold text-ink">2. Contacte a sua autarquia ou SMAS</h2>
-                <p>O abastecimento de água é geralmente gerido pelos serviços municipalizados (SMAS) ou pela câmara municipal. Eles saberão informar se é uma rotura conhecida.</p>
-            </div>
-
-            <div>
-                <h2 class="mb-4 text-2xl font-semibold text-ink">3. Avise os vizinhos</h2>
-                <p>Um corte de água afeta a higiene e a alimentação de todos. Reporte no <strong>Faltou</strong> para que outros saibam que não é um problema isolado da canalização deles.</p>
-                <div class="mt-4">
-                    <a href="{{ url('/falta-agua') }}" class="btn btn-secondary">Reportar falta de água</a>
-                </div>
-            </div>
-
-            <div class="p-6 rounded-2xl bg-river/10">
-                <h3 class="font-semibold text-ink">Quando a água voltar</h3>
-                <p class="mt-2 text-base">É normal que a água saia com ar (esbranquiçada) ou com sedimentos (acastanhada) após um corte. <strong>Deixe a água correr</strong> durante alguns minutos na torneira mais próxima do contador até ficar transparente antes de a usar para beber ou cozinhar.</p>
-            </div>
-
-            <div>
-                <h2 class="mb-4 text-2xl font-semibold text-ink">Links Úteis</h2>
-                <ul class="space-y-2 text-base">
-                    <li><a href="https://www.epal.pt/" target="_blank" rel="noopener noreferrer" class="text-river hover:underline">EPAL (Lisboa e Vale do Tejo)</a></li>
-                    <li><a href="https://www.aguasdeportugal.pt/" target="_blank" rel="noopener noreferrer" class="text-river hover:underline">Águas de Portugal</a></li>
-                    <li><a href="https://www.ipma.pt/" target="_blank" rel="noopener noreferrer" class="text-river hover:underline">IPMA</a> - Para verificar situações de seca ou avisos meteorológicos.</li>
-                </ul>
-            </div>
-
+@section('guide-body')
+    <div class="guide-step">
+        <span class="guide-step-number">1</span>
+        <div>
+            <h2>Identifique a causa</h2>
+            <p>Verifique se tem alguma torneira de segurança fechada em casa (geralmente junto ao contador). Se não for o caso, veja se os vizinhos têm o mesmo problema ou se há obras na rua.</p>
         </div>
-
-        <aside class="space-y-6">
-            <div class="card bg-white/50">
-                <h3 class="font-display text-lg">Reportar Agora</h3>
-                <p class="mt-2 text-sm text-ink/60">Ajude a comunidade localizando a falha.</p>
-                <a href="{{ url('/falta-agua') }}" class="mt-4 w-full btn btn-secondary">Falta água</a>
-            </div>
-            
-            <div class="card bg-white/50">
-                <h3 class="font-display text-lg">Dica Rápida</h3>
-                <p class="mt-2 text-sm text-ink/80">Mantenha sempre alguns garrafões de água potável em casa para emergências.</p>
-            </div>
-        </aside>
-
     </div>
-</section>
+
+    <div class="guide-step">
+        <span class="guide-step-number">2</span>
+        <div>
+            <h2>Contacte a sua autarquia ou SMAS</h2>
+            <p>O abastecimento de água é geralmente gerido pelos serviços municipalizados (SMAS) ou pela câmara municipal. Eles saberão informar se é uma rotura conhecida.</p>
+            <a href="{{ url('/contactos') }}" class="btn btn-secondary mt-5">
+                <x-icon name="phone" :size="16" /> Ver contactos de água
+            </a>
+        </div>
+    </div>
+
+    <div class="guide-step">
+        <span class="guide-step-number">3</span>
+        <div>
+            <h2>Avise os vizinhos</h2>
+            <p>Um corte de água afeta a higiene e a alimentação de todos. Reporte no <strong>Faltou</strong> para que outros saibam que não é um problema isolado da canalização deles.</p>
+            <a href="{{ url('/falta-agua') }}" class="btn btn-water mt-5">
+                <x-icon name="droplet" :size="16" /> Reportar falta de água
+            </a>
+        </div>
+    </div>
+
+    <div class="callout callout-river">
+        <h3 class="flex items-center gap-2"><x-icon name="info" :size="18" /> Quando a água voltar</h3>
+        <p>É normal que a água saia com ar (esbranquiçada) ou com sedimentos (acastanhada) após um corte. <strong>Deixe a água correr</strong> durante alguns minutos na torneira mais próxima do contador até ficar transparente antes de a usar para beber ou cozinhar.</p>
+    </div>
+
+    <div>
+        <h2>Links úteis</h2>
+        <div class="mt-4 grid gap-2 text-base">
+            <a href="https://www.epal.pt/" target="_blank" rel="noopener noreferrer" class="link-row">
+                <span><span class="block">EPAL</span><span class="block text-sm font-normal text-muted">Lisboa e Vale do Tejo.</span></span>
+                <x-icon name="external" :size="16" class="shrink-0 text-muted" />
+            </a>
+            <a href="https://www.aguasdeportugal.pt/" target="_blank" rel="noopener noreferrer" class="link-row">
+                <span><span class="block">Águas de Portugal</span><span class="block text-sm font-normal text-muted">Grupo público de abastecimento de água.</span></span>
+                <x-icon name="external" :size="16" class="shrink-0 text-muted" />
+            </a>
+            <a href="https://www.ipma.pt/" target="_blank" rel="noopener noreferrer" class="link-row">
+                <span><span class="block">IPMA</span><span class="block text-sm font-normal text-muted">Para verificar situações de seca ou avisos meteorológicos.</span></span>
+                <x-icon name="external" :size="16" class="shrink-0 text-muted" />
+            </a>
+        </div>
+    </div>
+@endsection
+
+@section('guide-aside')
+    <div class="card">
+        <div class="card-title">Reportar agora</div>
+        <p class="card-subtitle">Ajude a comunidade localizando a falha.</p>
+        <a href="{{ url('/falta-agua') }}" class="btn btn-water mt-4 w-full">
+            <x-icon name="droplet" :size="16" /> Falta água
+        </a>
+    </div>
+    <div class="callout callout-sand !text-sm">
+        <div class="font-semibold text-ink">Dica rápida</div>
+        <p class="mt-1 text-ink/80">Mantenha sempre alguns garrafões de água potável em casa para emergências.</p>
+    </div>
 @endsection

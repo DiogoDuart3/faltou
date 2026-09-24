@@ -35,4 +35,11 @@ return [
         ],
     ],
 
+    'openpanel' => [
+        'client_id' => env('VITE_OPENPANEL_CLIENT_ID'),
+        'secret' => env('OPENPANEL_API_SECRET'),
+        'api_url' => env('OPENPANEL_API_URL', 'https://openpanel-api.diogoduarte.net'),
+        'script_url' => env('OPENPANEL_SCRIPT_URL', 'https://openpanel.diogoduarte.net/op1.js'),
+    ],
+
 ];

@@ -4,8 +4,8 @@
   "description": "Alertas comunitários de falhas de luz e água em Portugal.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#f8f4ec",
-  "theme_color": "#1f1b16",
+  "background_color": "#f6f6f3",
+  "theme_color": "#15171c",
   "icons": [
     {
       "src": "/favicon.png",

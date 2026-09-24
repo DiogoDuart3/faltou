@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('layouts.guide')
 
 @section('title', 'Danos por Falha de Energia: Como pedir indemnização? - Faltou')
 @section('description', 'Os seus eletrodomésticos avariaram devido a um pico de corrente ou falha de luz? Saiba como pedir indemnização à E-Redes e quais os seus direitos.')
@@ -52,79 +52,74 @@
 </script>
 @endpush
 
-@section('content')
-<section class="max-w-4xl px-6 py-12 mx-auto">
-    <div class="mb-10">
-        <a href="{{ url('/') }}" class="text-sm font-medium hover:underline text-ink/60">&larr; Voltar ao início</a>
-        <h1 class="mt-4 text-4xl font-semibold leading-tight md:text-5xl">Danos por falha de energia:<br>Como pedir indemnização?</h1>
-        <p class="mt-4 text-xl text-ink/70">Se a falta de luz ou um pico de tensão estragou os seus equipamentos, você tem direitos. Saiba como ativá-los.</p>
+@section('guide-icon', 'scale')
+@section('guide-heading', 'Danos por falha de energia: como pedir indemnização?')
+@section('guide-lead', 'Se a falta de luz ou um pico de tensão estragou os seus equipamentos, você tem direitos. Saiba como ativá-los.')
+
+@section('guide-body')
+    <div class="callout callout-sand">
+        <h3 class="flex items-center gap-2"><x-icon name="info" :size="18" /> Nota importante</h3>
+        <p>Este guia aplica-se a consumidores em Portugal Continental ligados à rede de baixa tensão (domésticos). O operador responsável pela distribuição é a <strong>E-Redes</strong> (antiga EDP Distribuição).</p>
     </div>
 
-    <div class="grid gap-10 md:grid-cols-[1fr_300px]">
-        
-        <div class="space-y-8 text-lg leading-relaxed text-ink/80">
-            
-            <div class="p-6 rounded-2xl bg-amber-50 border border-amber-100">
-                <h3 class="font-semibold text-amber-900">Nota Importante</h3>
-                <p class="mt-2 text-base text-amber-800">Este guia aplica-se a consumidores em Portugal Continental ligados à rede de baixa tensão (domésticos). O operador responsável pela distribuição é a <strong>E-Redes</strong> (antiga EDP Distribuição).</p>
-            </div>
-
-            <div>
-                <h2 class="mb-4 text-2xl font-semibold text-ink">1. Registe a Ocorrência</h2>
-                <p>Assim que detetar a avaria, contacte a linha de avarias (800 506 506) para que fique registado que houve um problema na sua zona. Anote a data e hora exata da falha.</p>
-            </div>
-
-            <div>
-                <h2 class="mb-4 text-2xl font-semibold text-ink">2. Reúna Provas</h2>
-                <p>Para o processo de indemnização, vai precisar de:</p>
-                <ul class="mt-2 space-y-2 list-disc list-inside">
-                    <li><strong>Fotografias</strong> aos equipamentos danificados e alimentos estragados (no frigorífico/arca).</li>
-                    <li><strong>Relatório Técnico</strong> de um reparador credenciado a confirmar que a avaria foi causada por "sobretensão" ou "problema na rede elétrica".</li>
-                    <li><strong>Orçamento de Reparação</strong> ou fatura da reparação.</li>
-                    <li><strong>Lista dos alimentos</strong> deteriorados com estimativa de valor (guarde talões se tiver).</li>
-                </ul>
-            </div>
-
-            <div>
-                <h2 class="mb-4 text-2xl font-semibold text-ink">3. Apresente a Reclamação</h2>
-                <p>Pode fazer o pedido diretamente no site da E-Redes através do formulário "Danos em Equipamentos".</p>
-                <p class="mt-2">Deve incluir:</p>
-                <ul class="mt-2 space-y-2 list-disc list-inside">
-                    <li>Código do Ponto de Entrega (CPE) - encontra na sua fatura da luz.</li>
-                    <li>Data e hora do incidente.</li>
-                    <li>Descrição dos danos e provas recolhidas.</li>
-                </ul>
-                <div class="mt-6">
-                    <a href="https://balcaodigital.e-redes.pt/requests/connection/losses" target="_blank" rel="noopener noreferrer" class="btn btn-primary">Formulário E-Redes &rarr;</a>
-                </div>
-            </div>
-
-            <div>
-                <h2 class="mb-4 text-2xl font-semibold text-ink">4. Prazos de Resposta</h2>
-                <p>A E-Redes tem, por norma, 15 dias úteis para responder à sua reclamação. Se a resposta for favorável, o pagamento é processado via transferência bancária.</p>
-            </div>
-
+    <div class="guide-step">
+        <span class="guide-step-number">1</span>
+        <div>
+            <h2>Registe a ocorrência</h2>
+            <p>Assim que detetar a avaria, contacte a linha de avarias (<a href="tel:800506506">800 506 506</a>) para que fique registado que houve um problema na sua zona. Anote a data e hora exata da falha.</p>
         </div>
-
-        <aside class="space-y-6">
-            <div class="card bg-white/50">
-                <h3 class="font-display text-lg">Direitos do Consumidor</h3>
-                <p class="mt-2 text-sm text-ink/60">A qualidade de serviço é regulada pela ERSE. Se não concordar com a decisão da E-Redes, pode recorrer ao Livro de Reclamações ou à ERSE.</p>
-            </div>
-            
-            <div class="card bg-white/50">
-                <h3 class="font-display text-lg">Outros Guias</h3>
-                <ul class="mt-4 space-y-3 text-sm">
-                    <li>
-                        <a href="{{ url('/guia-falta-eletricidade') }}" class="text-river hover:underline">O que fazer sem luz?</a>
-                    </li>
-                    <li>
-                        <a href="{{ url('/guia-kit-emergencia') }}" class="text-river hover:underline">Kit de Emergência</a>
-                    </li>
-                </ul>
-            </div>
-        </aside>
-
     </div>
-</section>
+
+    <div class="guide-step">
+        <span class="guide-step-number">2</span>
+        <div>
+            <h2>Reúna provas</h2>
+            <p>Para o processo de indemnização, vai precisar de:</p>
+            <ul>
+                <li><strong>Fotografias</strong> aos equipamentos danificados e alimentos estragados (no frigorífico/arca).</li>
+                <li><strong>Relatório Técnico</strong> de um reparador credenciado a confirmar que a avaria foi causada por "sobretensão" ou "problema na rede elétrica".</li>
+                <li><strong>Orçamento de Reparação</strong> ou fatura da reparação.</li>
+                <li><strong>Lista dos alimentos</strong> deteriorados com estimativa de valor (guarde talões se tiver).</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="guide-step">
+        <span class="guide-step-number">3</span>
+        <div>
+            <h2>Apresente a reclamação</h2>
+            <p>Pode fazer o pedido diretamente no site da E-Redes através do formulário "Danos em Equipamentos". Deve incluir:</p>
+            <ul>
+                <li>Código do Ponto de Entrega (CPE) - encontra na sua fatura da luz.</li>
+                <li>Data e hora do incidente.</li>
+                <li>Descrição dos danos e provas recolhidas.</li>
+            </ul>
+            <a href="https://balcaodigital.e-redes.pt/requests/connection/losses" target="_blank" rel="noopener noreferrer" class="btn btn-primary mt-5">
+                Formulário E-Redes <x-icon name="external" :size="16" />
+            </a>
+        </div>
+    </div>
+
+    <div class="guide-step">
+        <span class="guide-step-number">4</span>
+        <div>
+            <h2>Prazos de resposta</h2>
+            <p>A E-Redes tem, por norma, 15 dias úteis para responder à sua reclamação. Se a resposta for favorável, o pagamento é processado via transferência bancária.</p>
+        </div>
+    </div>
+@endsection
+
+@section('guide-aside')
+    <div class="card">
+        <div class="card-title">Checklist do processo</div>
+        <ul class="mt-3 space-y-2.5 text-sm">
+            @foreach (['Data e hora da falha', 'Fotografias dos danos', 'Relatório técnico', 'Orçamento ou fatura', 'Código CPE (fatura da luz)'] as $item)
+                <li class="flex items-start gap-2.5"><x-icon name="check-circle" :size="16" class="mt-0.5 shrink-0 text-success" /> {{ $item }}</li>
+            @endforeach
+        </ul>
+    </div>
+    <div class="card">
+        <div class="card-title">Direitos do consumidor</div>
+        <p class="mt-2 text-sm text-muted">A qualidade de serviço é regulada pela ERSE. Se não concordar com a decisão da E-Redes, pode recorrer ao Livro de Reclamações ou à ERSE.</p>
+    </div>
 @endsection

@@ -3,15 +3,86 @@ import './bootstrap';
 const ONE_DAY_MS = 24 * 60 * 60 * 1000;
 const DEFAULT_CENTER = { lat: 39.5, lng: -8.0 };
 
+const ICONS = {
+    power: '<path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"/>',
+    water: '<path d="M12 22a7 7 0 0 0 7-7c0-2-1-3.9-3-5.5s-3.5-4-4-6.5c-.5 2.5-2 4.9-4 6.5C6 11.1 5 13 5 15a7 7 0 0 0 7 7z"/>',
+    pin: '<path d="M20 10c0 4.99-5.54 10.19-7.4 11.8a1 1 0 0 1-1.2 0C9.54 20.19 4 14.99 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/>',
+    check: '<circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/>',
+    alert: '<circle cx="12" cy="12" r="10"/><path d="M12 8v4"/><path d="M12 16h.01"/>',
+};
+
+const icon = (name, size = 18) => {
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.setAttribute('width', size);
+    svg.setAttribute('height', size);
+    svg.setAttribute('viewBox', '0 0 24 24');
+    svg.setAttribute('fill', 'none');
+    svg.setAttribute('stroke', 'currentColor');
+    svg.setAttribute('stroke-width', '2');
+    svg.setAttribute('stroke-linecap', 'round');
+    svg.setAttribute('stroke-linejoin', 'round');
+    svg.setAttribute('aria-hidden', 'true');
+    svg.innerHTML = ICONS[name] ?? '';
+    return svg;
+};
+
 const OUTAGE_META = {
     power: {
         label: 'Eletricidade',
         pill: 'pill-ember',
+        color: '#e8590c',
     },
     water: {
         label: 'Água',
         pill: 'pill-river',
+        color: '#0b7285',
     },
+};
+
+const IMPACT_LABELS = {
+    residencial: 'Residencial',
+    comercial: 'Comercial',
+    rua: 'Via pública',
+    outros: 'Outros',
+};
+
+const track = (event, properties = {}) => {
+    try {
+        if (typeof window.op === 'function') {
+            window.op('track', event, properties);
+        }
+    } catch (error) {}
+};
+
+const setStatus = (element, text, tone = '') => {
+    if (!element) {
+        return;
+    }
+    element.textContent = text;
+    element.classList.remove('is-error', 'is-success', 'is-warning');
+    if (tone) {
+        element.classList.add(`is-${tone}`);
+    }
+};
+
+const showToast = (text, tone = 'success') => {
+    const region = document.querySelector('[data-toast-region]');
+    if (!region) {
+        return;
+    }
+    const toast = document.createElement('div');
+    toast.className = 'toast';
+    const glyph = icon(tone === 'success' ? 'check' : 'alert', 18);
+    glyph.classList.add('mt-0.5', 'shrink-0', tone === 'success' ? 'text-emerald-300' : 'text-amber-300');
+    const body = document.createElement('span');
+    body.textContent = text;
+    toast.append(glyph, body);
+    region.appendChild(toast);
+    window.setTimeout(() => {
+        toast.style.transition = 'opacity .3s';
+        toast.style.opacity = '0';
+        window.setTimeout(() => toast.remove(), 300);
+    }, 4000);
 };
 
 const GEO_CACHE_KEY = 'faltou:geocode-cache';
@@ -361,90 +432,102 @@ const renderList = (container, items, renderItem, emptyLabel) => {
     if (items.length === 0) {
         const empty = document.createElement('div');
         empty.className = 'empty-state';
-        empty.textContent = emptyLabel;
+        const emptyIcon = icon('pin', 20);
+        emptyIcon.classList.add('mb-1', 'text-muted/60');
+        const emptyText = document.createElement('span');
+        emptyText.textContent = emptyLabel;
+        empty.append(emptyIcon, emptyText);
         container.appendChild(empty);
         return;
     }
     items.forEach((item) => container.appendChild(renderItem(item)));
 };
 
+const createPendingBadge = () => {
+    const badge = document.createElement('span');
+    badge.className = 'pill pill-sand !px-2 !py-0.5 !text-[11px]';
+    badge.textContent = 'A aguardar envio';
+    return badge;
+};
+
 const createReportCard = (item) => {
     const meta = OUTAGE_META[item.type] || { label: 'Aviso', pill: 'pill' };
-    const card = document.createElement('div');
-    card.className = 'rounded-2xl border border-ink/10 bg-white/80 p-4 text-sm text-ink/70';
+    const card = document.createElement('article');
+    card.className = 'report-item';
+
+    const iconWrap = document.createElement('span');
+    iconWrap.className = `report-icon report-icon-${item.type === 'water' ? 'water' : 'power'}`;
+    iconWrap.appendChild(icon(item.type === 'water' ? 'water' : 'power', 18));
+
+    const body = document.createElement('div');
+    body.className = 'min-w-0 flex-1';
 
     const header = document.createElement('div');
-    header.className = 'flex items-center justify-between';
-
-    const label = document.createElement('span');
-    label.className = `pill ${meta.pill}`;
-    label.textContent = meta.label;
-
-    const time = document.createElement('span');
-    time.className = 'text-xs text-ink/50';
-    time.textContent = formatRelative(item.createdAt);
-
-    const leftHeader = document.createElement('div');
-    leftHeader.className = 'flex items-center gap-2';
-    leftHeader.appendChild(label);
-
-    if (item.pending) {
-        const pendingBadge = document.createElement('span');
-        pendingBadge.className = 'pill pill-sand !py-0.5 !text-[10px] !normal-case !tracking-normal';
-        pendingBadge.textContent = 'A aguardar envio';
-        leftHeader.appendChild(pendingBadge);
-    }
-
-    header.appendChild(leftHeader);
-    header.appendChild(time);
-
-    const impact = document.createElement('div');
-    impact.className = 'mt-3 text-xs uppercase tracking-[0.2em] text-ink/50';
-    impact.textContent = item.impact || 'impacto não indicado';
+    header.className = 'flex items-start justify-between gap-2';
 
     const locality = document.createElement('div');
-    locality.className = 'mt-2 text-sm font-medium text-ink';
-    locality.textContent = `Localidade: ${item.locality || DEFAULT_LOCALITY_LABEL}`;
+    locality.className = 'truncate text-sm font-semibold text-ink';
+    locality.textContent = item.locality || DEFAULT_LOCALITY_LABEL;
 
-    const note = document.createElement('div');
-    note.className = 'mt-2 text-sm text-ink/70';
-    note.textContent = item.note ? item.note : 'Sem descrição adicional.';
+    const time = document.createElement('time');
+    time.className = 'shrink-0 text-xs text-muted';
+    time.dateTime = new Date(item.createdAt).toISOString();
+    time.textContent = formatRelative(item.createdAt);
 
-    card.appendChild(header);
-    card.appendChild(impact);
-    card.appendChild(locality);
-    card.appendChild(note);
+    header.append(locality, time);
 
+    const metaRow = document.createElement('div');
+    metaRow.className = 'mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted';
+    const typeLabel = document.createElement('span');
+    typeLabel.textContent = meta.label;
+    metaRow.appendChild(typeLabel);
+    if (item.impact) {
+        const sep = document.createElement('span');
+        sep.textContent = '·';
+        const impact = document.createElement('span');
+        impact.textContent = IMPACT_LABELS[item.impact] ?? item.impact;
+        metaRow.append(sep, impact);
+    }
+    if (item.pending) {
+        metaRow.appendChild(createPendingBadge());
+    }
+
+    body.append(header, metaRow);
+
+    if (item.note) {
+        const note = document.createElement('p');
+        note.className = 'mt-1.5 text-sm break-words text-ink/80';
+        note.textContent = item.note;
+        body.appendChild(note);
+    }
+
+    card.append(iconWrap, body);
     return card;
 };
 
 const createCommentCard = (item) => {
-    const card = document.createElement('div');
-    card.className = 'rounded-2xl border border-ink/10 bg-white/80 p-3 text-sm text-ink/70';
+    const card = document.createElement('article');
+    card.className = 'comment-item';
 
     const header = document.createElement('div');
-    header.className = 'flex items-center justify-between mb-1';
+    header.className = 'mb-1 flex items-center gap-2';
 
-    const time = document.createElement('div');
-    time.className = 'text-xs text-ink/50';
+    const time = document.createElement('time');
+    time.className = 'text-xs text-muted';
+    time.dateTime = new Date(item.createdAt).toISOString();
     time.textContent = formatRelative(item.createdAt);
 
     header.appendChild(time);
 
     if (item.pending) {
-        const pendingBadge = document.createElement('span');
-        pendingBadge.className = 'pill pill-sand !py-0.5 !text-[10px] !normal-case !tracking-normal';
-        pendingBadge.textContent = 'A aguardar envio';
-        header.appendChild(pendingBadge);
+        header.appendChild(createPendingBadge());
     }
 
-    const text = document.createElement('div');
-    text.className = 'text-sm text-ink';
+    const text = document.createElement('p');
+    text.className = 'text-sm break-words text-ink';
     text.textContent = item.text;
 
-    card.appendChild(header);
-    card.appendChild(text);
-
+    card.append(header, text);
     return card;
 };
 
@@ -470,25 +553,25 @@ const reportMapRegistry = new Map();
 
 const createPopupContent = (report) => {
     const container = document.createElement('div');
+    container.className = 'min-w-[10rem] max-w-[15rem]';
+
     const title = document.createElement('div');
-    title.className = 'font-semibold';
-    title.textContent = OUTAGE_META[report.type]?.label ?? 'Aviso';
+    title.className = 'flex items-center gap-1.5 text-xs font-semibold';
+    title.style.color = OUTAGE_META[report.type]?.color ?? 'inherit';
+    title.append(icon(report.type === 'water' ? 'water' : 'power', 12));
+    const titleText = document.createElement('span');
+    titleText.textContent = `${OUTAGE_META[report.type]?.label ?? 'Aviso'} · ${formatRelative(report.createdAt)}`;
+    title.appendChild(titleText);
 
     const locality = document.createElement('div');
-    locality.className = 'text-sm';
+    locality.className = 'mt-1 text-sm font-semibold text-ink';
     locality.textContent = report.locality || DEFAULT_LOCALITY_LABEL;
 
-    const time = document.createElement('div');
-    time.className = 'text-xs text-ink/60';
-    time.textContent = formatRelative(report.createdAt);
-
-    container.appendChild(title);
-    container.appendChild(locality);
-    container.appendChild(time);
+    container.append(title, locality);
 
     if (report.note) {
         const note = document.createElement('div');
-        note.className = 'text-xs text-ink/70';
+        note.className = 'mt-1 text-xs text-muted';
         note.textContent = report.note;
         container.appendChild(note);
     }
@@ -532,7 +615,7 @@ const initReportMaps = () => {
         initialize();
     } else {
         mapElements.forEach((element) => {
-            element.textContent = 'Mapa indisponível no momento.';
+            element.textContent = 'A carregar mapa...';
         });
         window.addEventListener('load', initialize, { once: true });
     }
@@ -579,13 +662,13 @@ const refreshReportMaps = async () => {
                     return;
                 }
 
-                const color = report.type === 'water' ? '#4f7f89' : '#f06b36';
+                const color = OUTAGE_META[report.type]?.color ?? '#15171c';
                 const marker = window.L.circleMarker([report.lat, report.lng], {
-                    radius: 10,
+                    radius: 8,
                     color: '#ffffff',
                     fillColor: color,
                     fillOpacity: 1,
-                    weight: 3,
+                    weight: 2.5,
                     className: 'map-marker-vibrant'
                 });
 
@@ -619,8 +702,9 @@ const refreshReportMaps = async () => {
 const updateCounts = () => {
     document.querySelectorAll('[data-report-count]').forEach((element) => {
         const type = element.dataset.reportCount;
-        const reports = type ? getStoredReports(type) : [];
-        element.textContent = reports.length.toString();
+        const types = type === 'all' ? Object.keys(OUTAGE_META) : [type].filter((t) => OUTAGE_META[t]);
+        const total = types.reduce((sum, t) => sum + getStoredReports(t).length, 0);
+        element.textContent = total.toString();
     });
 };
 
@@ -642,13 +726,36 @@ const updateConnectionState = () => {
     text.textContent = `Ligação ${online}`;
 };
 
+let homeFeedReports = [];
+let homeFeedFilter = 'all';
+
+const renderHomeFeed = () => {
+    const container = document.querySelector('[data-report-feed]');
+    if (!container) {
+        return;
+    }
+    const reports =
+        homeFeedFilter === 'all' ? homeFeedReports : homeFeedReports.filter((r) => r.type === homeFeedFilter);
+    renderList(container, reports, createReportCard, 'Sem avisos nas últimas 24 horas.');
+};
+
+const setupFeedFilters = () => {
+    const buttons = document.querySelectorAll('[data-feed-filter]');
+    buttons.forEach((button) => {
+        button.addEventListener('click', () => {
+            homeFeedFilter = button.dataset.feedFilter;
+            buttons.forEach((b) => b.setAttribute('aria-selected', b === button ? 'true' : 'false'));
+            renderHomeFeed();
+        });
+    });
+};
+
 const setupHomeFeed = async () => {
     const container = document.querySelector('[data-report-feed]');
     if (!container) {
         return;
     }
-    const powerReports = await loadReports('power');
-    const waterReports = await loadReports('water');
+    const [powerReports, waterReports] = await Promise.all([loadReports('power'), loadReports('water')]);
 
     // Hydrate all at once before rendering
     const [hPower, hWater] = await Promise.all([
@@ -656,11 +763,11 @@ const setupHomeFeed = async () => {
         hydrateReports('water', waterReports)
     ]);
 
-    const reports = [...hPower, ...hWater]
+    homeFeedReports = [...hPower, ...hWater]
         .filter(within24h)
         .sort((a, b) => b.createdAt - a.createdAt);
 
-    renderList(container, reports, createReportCard, 'Ainda não existem avisos nas últimas 24 horas.');
+    renderHomeFeed();
     updateCounts();
     refreshReportMaps();
 };
@@ -680,7 +787,9 @@ const setupOutagePage = () => {
     const latInput = page.querySelector('[data-lat]');
     const lngInput = page.querySelector('[data-lng]');
     const noteInput = page.querySelector('[data-note]');
-    const impactInput = page.querySelector('[data-impact]');
+    const getImpact = () =>
+        page.querySelector('[data-impact]:checked')?.value ?? page.querySelector('select[data-impact]')?.value ?? '';
+    const locationStatusBox = page.querySelector('[data-location-status-box]');
     const locationMethod = page.querySelector('[data-location-method]');
     const locationStatus = page.querySelector('[data-location-status]');
     const useLocationButton = page.querySelector('[data-use-location]');
@@ -693,7 +802,7 @@ const setupOutagePage = () => {
     const updateLocality = async (lat, lng) => {
         currentLocality = await resolveLocality(lat, lng);
         if (locationStatus) {
-            locationStatus.textContent = `Localidade: ${currentLocality}.`;
+            locationStatus.textContent = currentLocality;
         }
     };
 
@@ -702,17 +811,25 @@ const setupOutagePage = () => {
         if (lngInput) lngInput.value = lng.toFixed(5);
         if (locationMethod) locationMethod.value = method;
         if (locationStatus) {
-            locationStatus.textContent = `Localização definida (${method}). A obter localidade...`;
+            locationStatus.textContent = 'Localização definida. A obter localidade...';
         }
+        locationStatusBox?.classList.add('is-set');
         updateLocality(lat, lng);
         if (mapInstance) {
             const position = [lat, lng];
             if (!marker) {
-                marker = window.L.marker(position).addTo(mapInstance);
+                marker = window.L.circleMarker(position, {
+                    radius: 11,
+                    color: '#ffffff',
+                    weight: 3,
+                    fillColor: OUTAGE_META[type]?.color ?? '#15171c',
+                    fillOpacity: 1,
+                    className: 'map-marker-selected',
+                }).addTo(mapInstance);
             } else {
                 marker.setLatLng(position);
             }
-            mapInstance.setView(position, Math.max(mapInstance.getZoom(), 12));
+            mapInstance.setView(position, Math.max(mapInstance.getZoom(), 14));
         }
     };
 
@@ -739,7 +856,7 @@ const setupOutagePage = () => {
         if (window.L) {
             initMap();
         } else {
-            mapElement.textContent = 'Mapa indisponível. Use as coordenadas manuais.';
+            mapElement.textContent = 'A carregar mapa...';
             window.addEventListener('load', initMap, { once: true });
         }
     }
@@ -787,8 +904,10 @@ const setupOutagePage = () => {
             navigator.geolocation.getCurrentPosition(
                 (position) => {
                     setLocation(position.coords.latitude, position.coords.longitude, 'gps');
+                    track('location_gps', { type, success: true });
                 },
                 () => {
+                    track('location_gps', { type, success: false });
                     if (locationStatus) {
                         locationStatus.textContent = 'Falha ao obter localização. Use o mapa manualmente.';
                     }
@@ -814,8 +933,7 @@ const setupOutagePage = () => {
             const lng = parseCoordinate(lngInput?.value ?? '');
             if (lat === null || lng === null) {
                 if (status) {
-                    status.textContent = 'Defina uma localização antes de publicar o aviso.';
-                    status.className = 'text-xs text-ember font-medium';
+                    setStatus(status, 'Defina uma localização antes de publicar o aviso.', 'error');
                 }
                 if (submitBtn) {
                     submitBtn.disabled = false;
@@ -826,8 +944,7 @@ const setupOutagePage = () => {
             const noteValue = noteInput?.value.trim() ?? '';
             if (noteValue.length > MAX_NOTE_LENGTH) {
                 if (status) {
-                    status.textContent = `Descrição demasiado longa. Máximo ${MAX_NOTE_LENGTH} caracteres.`;
-                    status.className = 'text-xs text-ember font-medium';
+                    setStatus(status, `Descrição demasiado longa. Máximo ${MAX_NOTE_LENGTH} caracteres.`, 'error');
                 }
                 if (submitBtn) {
                     submitBtn.disabled = false;
@@ -837,8 +954,7 @@ const setupOutagePage = () => {
             }
 
             if (status) {
-                status.textContent = 'A processar aviso...';
-                status.className = 'text-xs text-ink/60';
+                setStatus(status, 'A processar aviso...');
             }
 
             let locality = currentLocality;
@@ -852,14 +968,17 @@ const setupOutagePage = () => {
                 lng,
                 method: locationMethod?.value ?? 'manual',
                 note: noteValue,
-                impact: impactInput?.value ?? 'na',
+                impact: getImpact() || 'outros',
                 locality,
                 createdAt: Date.now(),
             };
 
             // Optimistic update
             savePendingReport(type, payload);
-            if (noteInput) noteInput.value = '';
+            if (noteInput) {
+                noteInput.value = '';
+                noteInput.dispatchEvent(new Event('input'));
+            }
             await refreshReports();
             updateCounts();
             setupHomeFeed();
@@ -888,6 +1007,12 @@ const setupOutagePage = () => {
                     });
                     const normalized = normalizeReport(response);
                     removePendingReport(type, payload.id);
+                    track('report_created', {
+                        type,
+                        impact: payload.impact,
+                        method: payload.method,
+                        has_note: Boolean(payload.note),
+                    });
                     const cached = storage.read(reportKey(type)).map(normalizeReport);
                     storage.write(reportKey(type), mergeByCreatedAt([normalized, ...cached]));
                     savedRemotely = true;
@@ -905,8 +1030,7 @@ const setupOutagePage = () => {
 
             if (blockedByServer) {
                 if (status) {
-                    status.textContent = 'Limite de envios atingido. Tente novamente daqui a pouco.';
-                    status.className = 'text-xs text-ember font-medium';
+                    setStatus(status, 'Limite de envios atingido. Tente novamente daqui a pouco.', 'error');
                 }
                 if (submitBtn) {
                     submitBtn.disabled = false;
@@ -917,14 +1041,12 @@ const setupOutagePage = () => {
 
             if (status) {
                 if (savedRemotely) {
-                    status.textContent = 'Aviso publicado com sucesso. Obrigado por ajudar.';
-                    status.className = 'text-xs text-river font-medium';
+                    setStatus(status, 'Aviso publicado com sucesso. Obrigado por ajudar.', 'success');
+                    showToast('Aviso publicado. Obrigado por ajudar a comunidade.');
                 } else if (!navigator.onLine) {
-                    status.textContent = 'Aviso guardado localmente. Será enviado quando houver ligação.';
-                    status.className = 'text-xs text-ember font-medium';
+                    setStatus(status, 'Aviso guardado localmente. Será enviado quando houver ligação.', 'warning');
                 } else {
-                    status.textContent = 'Ligação instável. O aviso foi guardado e será enviado em breve.';
-                    status.className = 'text-xs text-ember font-medium';
+                    setStatus(status, 'Ligação instável. O aviso foi guardado e será enviado em breve.', 'warning');
                 }
             }
             if (submitBtn) {
@@ -954,8 +1076,7 @@ const setupOutagePage = () => {
             const value = commentText?.value.trim() ?? '';
             if (!value) {
                 if (commentStatus) {
-                    commentStatus.textContent = 'Escreva um comentário antes de enviar.';
-                    commentStatus.className = 'text-xs text-ember font-medium';
+                    setStatus(commentStatus, 'Escreva um comentário antes de enviar.', 'error');
                 }
                 if (submitBtn) {
                     submitBtn.disabled = false;
@@ -965,8 +1086,7 @@ const setupOutagePage = () => {
             }
             if (value.length > MAX_COMMENT_LENGTH) {
                 if (commentStatus) {
-                    commentStatus.textContent = `Comentário demasiado longo. Máximo ${MAX_COMMENT_LENGTH} caracteres.`;
-                    commentStatus.className = 'text-xs text-ember font-medium';
+                    setStatus(commentStatus, `Comentário demasiado longo. Máximo ${MAX_COMMENT_LENGTH} caracteres.`, 'error');
                 }
                 if (submitBtn) {
                     submitBtn.disabled = false;
@@ -976,8 +1096,7 @@ const setupOutagePage = () => {
             }
 
             if (commentStatus) {
-                commentStatus.textContent = 'A processar comentário...';
-                commentStatus.className = 'text-xs text-ink/60';
+                setStatus(commentStatus, 'A processar comentário...');
             }
 
             const payload = {
@@ -988,7 +1107,10 @@ const setupOutagePage = () => {
 
             // Optimistic update
             savePendingComment(type, payload);
-            if (commentText) commentText.value = '';
+            if (commentText) {
+                commentText.value = '';
+                commentText.dispatchEvent(new Event('input'));
+            }
             await refreshComments();
 
             let savedRemotely = false;
@@ -1010,6 +1132,7 @@ const setupOutagePage = () => {
                     });
                     const normalized = normalizeComment(response);
                     removePendingComment(type, payload.id);
+                    track('comment_created', { type });
                     const cached = storage.read(commentKey(type)).map(normalizeComment);
                     storage.write(commentKey(type), mergeByCreatedAt([normalized, ...cached]));
                     savedRemotely = true;
@@ -1027,8 +1150,7 @@ const setupOutagePage = () => {
 
             if (blockedByServer) {
                 if (commentStatus) {
-                    commentStatus.textContent = 'Limite de comentários atingido. Tente novamente daqui a pouco.';
-                    commentStatus.className = 'text-xs text-ember font-medium';
+                    setStatus(commentStatus, 'Limite de comentários atingido. Tente novamente daqui a pouco.', 'error');
                 }
                 if (submitBtn) {
                     submitBtn.disabled = false;
@@ -1039,14 +1161,11 @@ const setupOutagePage = () => {
 
             if (commentStatus) {
                 if (savedRemotely) {
-                    commentStatus.textContent = 'Comentário enviado com sucesso.';
-                    commentStatus.className = 'text-xs text-river font-medium';
+                    setStatus(commentStatus, 'Comentário enviado com sucesso.', 'success');
                 } else if (!navigator.onLine) {
-                    commentStatus.textContent = 'Comentário guardado localmente. Será enviado quando houver ligação.';
-                    commentStatus.className = 'text-xs text-ember font-medium';
+                    setStatus(commentStatus, 'Comentário guardado localmente. Será enviado quando houver ligação.', 'warning');
                 } else {
-                    commentStatus.textContent = 'Ligação instável. O comentário foi guardado e será enviado em breve.';
-                    commentStatus.className = 'text-xs text-ember font-medium';
+                    setStatus(commentStatus, 'Ligação instável. O comentário foi guardado e será enviado em breve.', 'warning');
                 }
             }
             if (submitBtn) {
@@ -1061,6 +1180,64 @@ const setupOutagePage = () => {
     refreshComments();
 };
 
+const setupCharCounters = () => {
+    document.querySelectorAll('[data-counted]').forEach((field) => {
+        const counter = document.querySelector(`[data-count-for="${field.dataset.counted}"]`);
+        if (!counter) {
+            return;
+        }
+        const update = () => {
+            counter.textContent = field.value.length.toString();
+        };
+        field.addEventListener('input', update);
+        update();
+    });
+};
+
+const CHECKLIST_KEY = 'faltou:kit-checklist';
+
+const setupChecklist = () => {
+    const root = document.querySelector('[data-checklist]');
+    if (!root) {
+        return;
+    }
+    const items = [...root.querySelectorAll('[data-checklist-item]')];
+    const count = root.querySelector('[data-checklist-count]');
+    const bar = root.querySelector('[data-checklist-bar]');
+    const saved = storage.read(CHECKLIST_KEY);
+
+    const update = () => {
+        const checked = items.filter((item) => item.checked).map((item) => item.dataset.checklistItem);
+        if (count) count.textContent = checked.length.toString();
+        if (bar) bar.style.width = `${(checked.length / Math.max(items.length, 1)) * 100}%`;
+        storage.write(CHECKLIST_KEY, checked);
+    };
+
+    items.forEach((item) => {
+        item.checked = saved.includes(item.dataset.checklistItem);
+        item.addEventListener('change', update);
+    });
+    update();
+};
+
+const setupDropdowns = () => {
+    const dropdowns = document.querySelectorAll('[data-dropdown]');
+    document.addEventListener('click', (event) => {
+        dropdowns.forEach((dropdown) => {
+            if (dropdown.open && !dropdown.contains(event.target)) {
+                dropdown.open = false;
+            }
+        });
+    });
+    document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape') {
+            dropdowns.forEach((dropdown) => {
+                dropdown.open = false;
+            });
+        }
+    });
+};
+
 const registerServiceWorker = () => {
     if (!('serviceWorker' in navigator)) {
         return;
@@ -1072,6 +1249,10 @@ const registerServiceWorker = () => {
 
 updateCounts();
 updateConnectionState();
+setupDropdowns();
+setupCharCounters();
+setupChecklist();
+setupFeedFilters();
 initReportMaps();
 setupHomeFeed();
 setupOutagePage();
