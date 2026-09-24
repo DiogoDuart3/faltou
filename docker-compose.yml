@@ -61,6 +61,10 @@ x-app-env: &app-env
   # client-side config rather than failing — that is how a sibling app shipped
   # a literal "${APP_NAME}" in its <title>.
   VITE_APP_NAME: Faltou
+  # OpenPanel analytics. Read at request time via config/services.php, so the
+  # client ID works without a rebuild. The secret is server-side only.
+  VITE_OPENPANEL_CLIENT_ID: ${VITE_OPENPANEL_CLIENT_ID:-}
+  OPENPANEL_API_SECRET: ${OPENPANEL_API_SECRET:-}
 
 x-app-base: &app-base
   build:
