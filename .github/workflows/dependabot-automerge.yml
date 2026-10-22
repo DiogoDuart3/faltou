@@ -1,0 +1,23 @@
+name: dependabot-automerge
+
+# Faz merge automático dos PRs do Dependabot que só atualizam o digest da
+# imagem Docker base. O merge em main dispara o deploy no Coolify; se o build
+# falhar, o contentor antigo continua a correr.
+on: pull_request
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  automerge:
+    if: github.event.pull_request.user.login == 'dependabot[bot]'
+    runs-on: ${{ vars.CI_RUNNER || 'ubuntu-latest' }}
+    steps:
+      - id: meta
+        uses: dependabot/fetch-metadata@v2
+      - if: steps.meta.outputs.package-ecosystem == 'docker' && steps.meta.outputs.update-type != 'version-update:semver-major' && steps.meta.outputs.update-type != 'version-update:semver-minor'
+        run: gh pr merge --squash "$PR_URL"
+        env:
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
