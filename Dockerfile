@@ -13,7 +13,7 @@ RUN npm ci --no-audit --no-fund
 COPY . ./
 RUN npm run build
 
-FROM serversideup/php:8.4-fpm-nginx@sha256:103ccd4dbbd1362a5accfaffd35d114779949e5ec9e33943bdeed3344839be28
+FROM serversideup/php:8.4-fpm-nginx@sha256:68d1265af8d7ee11bc2f5636c3175296e5a40dd5180d75710d49877d454ee51f
 ENV APP_BASE_DIR=/var/www/html \
     AUTORUN_ENABLED=false \
     PHP_OPCACHE_ENABLE=1
