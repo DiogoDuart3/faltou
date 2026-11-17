@@ -185,7 +185,12 @@
         <div class="border-t border-line">
             <div class="container-page flex flex-col gap-2 py-5 text-xs text-muted sm:flex-row sm:items-center sm:justify-between">
                 <span>&copy; {{ date('Y') }} Faltou. Informação partilhada pela comunidade — não substitui os canais oficiais.</span>
-                <span>Mapas &copy; OpenStreetMap</span>
+                <span>
+                    Feito e mantido por
+                    <a href="https://tejobit.com" target="_blank" rel="noopener"
+                        class="font-semibold text-ink underline decoration-line underline-offset-2 hover:decoration-ink">TejoBit</a>
+                    · Mapas &copy; OpenStreetMap
+                </span>
             </div>
         </div>
         <div class="tabbar-spacer"></div>
