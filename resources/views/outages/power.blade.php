@@ -2,7 +2,6 @@
 
 @section('title', 'Falta de eletricidade - Faltou Portugal')
 @section('description', 'Partilhe rapidamente um aviso de falta de eletricidade na sua localidade.')
-@section('hide-mobile-cta', '1')
 
 @include('partials.leaflet')
 

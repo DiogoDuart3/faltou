@@ -81,20 +81,18 @@
         Saltar para o conteúdo
     </a>
 
-    <header class="sticky top-0 z-50 border-b border-line/80 bg-porcelain/85 backdrop-blur-md">
-        <div class="container-page flex h-16 items-center justify-between gap-4">
-            <a href="{{ url('/') }}" class="flex items-center gap-2.5" aria-label="Faltou — início">
-                <img src="{{ asset('images/icon.png') }}" alt="" class="h-9 w-9 rounded-xl object-cover">
+    <header class="sticky top-0 z-50 border-b border-line/80 bg-porcelain/90 backdrop-blur-md">
+        <div class="container-page flex h-14 items-center justify-between gap-3 lg:h-16">
+            <a href="{{ url('/') }}" class="flex min-h-11 items-center gap-2.5" aria-label="Faltou — início">
+                <img src="{{ asset('images/icon.png') }}" alt="" width="36" height="36" class="h-8 w-8 rounded-xl object-cover lg:h-9 lg:w-9">
                 <span class="leading-none">
                     <span class="block text-[17px] font-semibold tracking-tight">Faltou</span>
-                    <span class="mt-0.5 block text-[11px] font-medium text-muted">Alertas em Portugal</span>
+                    <span class="mt-0.5 hidden text-[11px] font-medium text-muted sm:block">Falhas de luz e água em Portugal</span>
                 </span>
             </a>
 
             <nav class="hidden items-center gap-1 lg:flex" aria-label="Principal">
                 <a class="nav-link" href="{{ url('/') }}" @if (request()->is('/')) aria-current="page" @endif>Mapa ao vivo</a>
-                <a class="nav-link" href="{{ url('/falta-eletricidade') }}" @if (request()->is('falta-eletricidade')) aria-current="page" @endif>Eletricidade</a>
-                <a class="nav-link" href="{{ url('/falta-agua') }}" @if (request()->is('falta-agua')) aria-current="page" @endif>Água</a>
                 <details class="group relative" data-dropdown>
                     <summary class="nav-link flex cursor-pointer list-none items-center gap-1 [&::-webkit-details-marker]:hidden"
                         @if ($isGuide) aria-current="page" @endif>
@@ -104,7 +102,7 @@
                     <div class="card absolute top-full left-0 mt-2 w-72 !p-2">
                         @foreach ($guides as $guide)
                             <a href="{{ url($guide['url']) }}"
-                                class="flex items-center gap-3 rounded-xl px-2.5 py-2 text-sm font-medium text-ink transition hover:bg-stone">
+                                class="flex min-h-11 items-center gap-3 rounded-xl px-2.5 py-2 text-sm font-medium text-ink transition hover:bg-stone">
                                 <span class="icon-tile !h-8 !w-8 {{ $guide['tone'] ? 'icon-tile-' . $guide['tone'] : '' }}">
                                     <x-icon :name="$guide['icon']" :size="16" />
                                 </span>
@@ -117,57 +115,37 @@
             </nav>
 
             <div class="flex items-center gap-2">
-                <a class="btn btn-primary hidden sm:inline-flex" href="{{ url('/#reportar') }}">
-                    <x-icon name="plus" :size="16" /> Reportar falha
+                <a class="btn btn-secondary lg:hidden" href="{{ url('/contactos') }}">
+                    <x-icon name="phone" :size="16" /> Contactos
                 </a>
-                <details class="group lg:hidden" data-dropdown>
-                    <summary class="btn btn-secondary !px-2.5 cursor-pointer list-none [&::-webkit-details-marker]:hidden"
-                        aria-label="Abrir menu">
-                        <x-icon name="menu" :size="20" class="group-open:hidden" />
-                        <x-icon name="x" :size="20" class="hidden group-open:block" />
-                    </summary>
-                    <div
-                        class="absolute inset-x-0 top-16 max-h-[calc(100dvh-4rem)] overflow-y-auto border-b border-line bg-porcelain px-4 pt-3 pb-6 shadow-lg">
-                        <nav class="space-y-1" aria-label="Menu móvel">
-                            <a class="mobile-nav-link" href="{{ url('/') }}">
-                                <span class="icon-tile !h-8 !w-8"><x-icon name="map-pin" :size="16" /></span> Mapa ao vivo
-                            </a>
-                            <a class="mobile-nav-link" href="{{ url('/falta-eletricidade') }}">
-                                <span class="icon-tile icon-tile-ember !h-8 !w-8"><x-icon name="zap" :size="16" /></span> Falta de eletricidade
-                            </a>
-                            <a class="mobile-nav-link" href="{{ url('/falta-agua') }}">
-                                <span class="icon-tile icon-tile-river !h-8 !w-8"><x-icon name="droplet" :size="16" /></span> Falta de água
-                            </a>
-                            <a class="mobile-nav-link" href="{{ url('/contactos') }}">
-                                <span class="icon-tile !h-8 !w-8"><x-icon name="phone" :size="16" /></span> Contactos de avaria
-                            </a>
-                        </nav>
-                        <div class="eyebrow mt-5 mb-2 px-3">Guias</div>
-                        <nav class="space-y-1" aria-label="Guias">
-                            @foreach ($guides as $guide)
-                                <a class="mobile-nav-link" href="{{ url($guide['url']) }}">
-                                    <span class="icon-tile !h-8 !w-8 {{ $guide['tone'] ? 'icon-tile-' . $guide['tone'] : '' }}">
-                                        <x-icon :name="$guide['icon']" :size="16" />
-                                    </span>
-                                    {{ $guide['label'] }}
-                                </a>
-                            @endforeach
-                        </nav>
-                    </div>
-                </details>
+                <a class="btn btn-power hidden lg:inline-flex" href="{{ url('/falta-eletricidade') }}"
+                    @if (request()->is('falta-eletricidade')) aria-current="page" @endif>
+                    <x-icon name="zap" :size="16" /> Falta luz
+                </a>
+                <a class="btn btn-water hidden lg:inline-flex" href="{{ url('/falta-agua') }}"
+                    @if (request()->is('falta-agua')) aria-current="page" @endif>
+                    <x-icon name="droplet" :size="16" /> Falta água
+                </a>
             </div>
         </div>
     </header>
+
+    <div class="offline-banner" role="status">
+        <div class="container-page flex items-start gap-2 py-2.5">
+            <x-icon name="wifi" :size="16" class="mt-0.5 shrink-0" />
+            <span>Sem ligação à internet. Pode reportar na mesma: o aviso fica guardado e é enviado quando a rede voltar.</span>
+        </div>
+    </div>
 
     <main id="conteudo">
         @yield('content')
     </main>
 
-    <footer class="mt-8 border-t border-line bg-white">
-        <div class="container-page grid gap-10 py-12 md:grid-cols-[1.4fr_1fr_1fr_1fr]">
-            <div>
+    <footer class="mt-10 border-t border-line bg-white">
+        <div class="container-page grid grid-cols-2 gap-x-6 gap-y-8 py-10 md:grid-cols-[1.4fr_1fr_1fr_1fr] md:py-12">
+            <div class="col-span-2 md:col-span-1">
                 <a href="{{ url('/') }}" class="flex items-center gap-2.5">
-                    <img src="{{ asset('images/icon.png') }}" alt="" class="h-8 w-8 rounded-lg object-cover">
+                    <img src="{{ asset('images/icon.png') }}" alt="" width="32" height="32" class="h-8 w-8 rounded-lg object-cover">
                     <span class="text-base font-semibold tracking-tight">Faltou</span>
                 </a>
                 <p class="mt-3 max-w-xs text-sm text-muted">
@@ -176,28 +154,28 @@
                 </p>
                 <div class="mt-4 flex flex-wrap gap-2">
                     <span class="badge"><x-icon name="clock" :size="12" /> Avisos duram 24h</span>
-                    <span class="badge"><x-icon name="wifi" :size="12" /> Funciona offline</span>
+                    <span class="badge"><x-icon name="wifi" :size="12" /> <span data-connection-text>Funciona offline</span></span>
                 </div>
             </div>
             <div>
-                <div class="eyebrow mb-3">Reportar</div>
-                <ul class="space-y-2">
+                <div class="eyebrow mb-2">Reportar</div>
+                <ul>
                     <li><a class="footer-link" href="{{ url('/falta-eletricidade') }}">Falta de eletricidade</a></li>
                     <li><a class="footer-link" href="{{ url('/falta-agua') }}">Falta de água</a></li>
                     <li><a class="footer-link" href="{{ url('/') }}">Mapa ao vivo</a></li>
                 </ul>
             </div>
             <div>
-                <div class="eyebrow mb-3">Guias</div>
-                <ul class="space-y-2">
+                <div class="eyebrow mb-2">Guias</div>
+                <ul>
                     @foreach ($guides as $guide)
                         <li><a class="footer-link" href="{{ url($guide['url']) }}">{{ $guide['label'] }}</a></li>
                     @endforeach
                 </ul>
             </div>
-            <div>
-                <div class="eyebrow mb-3">Ajuda</div>
-                <ul class="space-y-2">
+            <div class="col-span-2 md:col-span-1">
+                <div class="eyebrow mb-2">Ajuda</div>
+                <ul>
                     <li><a class="footer-link" href="{{ url('/contactos') }}">Contactos de avaria</a></li>
                     <li><a class="footer-link" href="tel:800506506">E-Redes · 800 506 506</a></li>
                     <li><a class="footer-link" href="tel:112">Emergência · 112</a></li>
@@ -210,25 +188,58 @@
                 <span>Mapas &copy; OpenStreetMap</span>
             </div>
         </div>
-        @unless (trim($__env->yieldContent('hide-mobile-cta')))
-            <div class="h-20 sm:hidden"></div>
-        @endunless
+        <div class="tabbar-spacer"></div>
     </footer>
 
-    @unless (trim($__env->yieldContent('hide-mobile-cta')))
-        <div class="pb-safe fixed inset-x-0 bottom-0 z-40 border-t border-line bg-white/95 px-4 pt-3 backdrop-blur sm:hidden">
-            <div class="grid grid-cols-2 gap-2">
-                <a href="{{ url('/falta-eletricidade') }}" class="btn btn-power">
-                    <x-icon name="zap" :size="16" /> Falta luz
-                </a>
-                <a href="{{ url('/falta-agua') }}" class="btn btn-water">
-                    <x-icon name="droplet" :size="16" /> Falta água
-                </a>
-            </div>
+    <nav class="tabbar" aria-label="Navegação rápida">
+        <div class="mx-auto grid h-full max-w-xl grid-cols-4">
+            <a href="{{ url('/') }}" class="tabbar-item" @if (request()->is('/')) aria-current="page" @endif>
+                <x-icon name="map-pin" :size="22" /> Mapa
+            </a>
+            <a href="{{ url('/falta-eletricidade') }}" class="tabbar-item tabbar-item-power"
+                @if (request()->is('falta-eletricidade')) aria-current="page" @endif>
+                <x-icon name="zap" :size="22" /> Falta luz
+            </a>
+            <a href="{{ url('/falta-agua') }}" class="tabbar-item tabbar-item-water"
+                @if (request()->is('falta-agua')) aria-current="page" @endif>
+                <x-icon name="droplet" :size="22" /> Falta água
+            </a>
+            <details data-dropdown class="h-full">
+                <summary class="tabbar-item" @if ($isGuide || request()->is('contactos')) aria-current="page" @endif>
+                    <x-icon name="book" :size="22" /> Ajuda
+                </summary>
+                <div class="sheet-backdrop" data-dropdown-close></div>
+                <div class="sheet">
+                    <div class="sheet-handle"></div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <a href="tel:800506506" class="btn btn-secondary btn-lg flex-col !gap-0">
+                            <span class="text-xs font-medium text-muted">Avaria elétrica</span> 800 506 506
+                        </a>
+                        <a href="tel:112" class="btn btn-lg flex-col !gap-0 bg-danger text-white">
+                            <span class="text-xs font-medium text-white/80">Emergência</span> 112
+                        </a>
+                    </div>
+                    <div class="eyebrow mt-5 mb-1 px-3">Guias</div>
+                    <div>
+                        @foreach ($guides as $guide)
+                            <a class="mobile-nav-link" href="{{ url($guide['url']) }}">
+                                <span class="icon-tile !h-9 !w-9 {{ $guide['tone'] ? 'icon-tile-' . $guide['tone'] : '' }}">
+                                    <x-icon :name="$guide['icon']" :size="18" />
+                                </span>
+                                {{ $guide['label'] }}
+                            </a>
+                        @endforeach
+                        <a class="mobile-nav-link" href="{{ url('/contactos') }}">
+                            <span class="icon-tile !h-9 !w-9"><x-icon name="phone" :size="18" /></span>
+                            Contactos de avaria
+                        </a>
+                    </div>
+                </div>
+            </details>
         </div>
-    @endunless
+    </nav>
 
-    <div class="pointer-events-none fixed inset-x-0 bottom-24 z-[60] flex flex-col items-center gap-2 px-4 sm:bottom-6"
+    <div class="pointer-events-none fixed inset-x-0 bottom-[calc(var(--tabbar-h)+0.75rem)] z-[60] flex flex-col items-center gap-2 px-4 lg:bottom-6"
         data-toast-region aria-live="polite"></div>
 
     @stack('scripts')

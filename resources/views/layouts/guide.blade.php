@@ -14,26 +14,29 @@
 @endphp
 
 @section('content')
-    <section class="relative overflow-hidden border-b border-line bg-white">
-        <div class="bg-grid mask-fade-b pointer-events-none absolute inset-0 opacity-60"></div>
-        <div class="container-page relative max-w-5xl py-10 sm:py-14">
-            <nav class="flex items-center gap-1.5 text-sm text-muted" aria-label="Navegação estrutural">
-                <a href="{{ url('/') }}" class="hover:text-ink">Início</a>
+    <section class="border-b border-line bg-white">
+        <div class="container-page max-w-5xl pt-4 pb-6 sm:pt-6 sm:pb-10">
+            <nav class="flex items-center gap-1 text-sm text-muted" aria-label="Navegação estrutural">
+                <a href="{{ url('/') }}" class="inline-flex min-h-11 items-center hover:text-ink">Início</a>
                 <x-icon name="chevron-right" :size="14" />
                 <span>@yield('guide-section', 'Guias')</span>
             </nav>
-            <span class="icon-tile {{ $guideTone ? 'icon-tile-' . $guideTone : '' }} mt-6 !h-12 !w-12">
-                <x-icon :name="trim($__env->yieldContent('guide-icon', 'book'))" :size="24" />
-            </span>
-            <h1 class="mt-5 max-w-3xl text-3xl font-semibold leading-tight tracking-tight sm:text-5xl">
-                @yield('guide-heading')
-            </h1>
-            <p class="mt-4 max-w-2xl text-lg text-muted">@yield('guide-lead')</p>
+            <div class="mt-2 flex items-start gap-3 sm:mt-4 sm:gap-4">
+                <span class="icon-tile {{ $guideTone ? 'icon-tile-' . $guideTone : '' }} sm:!h-12 sm:!w-12">
+                    <x-icon :name="trim($__env->yieldContent('guide-icon', 'book'))" :size="22" />
+                </span>
+                <div class="min-w-0">
+                    <h1 class="max-w-3xl text-[1.75rem] leading-tight font-semibold tracking-tight sm:text-4xl">
+                        @yield('guide-heading')
+                    </h1>
+                    <p class="mt-2 max-w-2xl text-base text-muted sm:text-lg">@yield('guide-lead')</p>
+                </div>
+            </div>
         </div>
     </section>
 
-    <section class="container-page max-w-5xl py-10 sm:py-14">
-        <div class="grid gap-10 lg:grid-cols-[1fr_300px]">
+    <section class="container-page max-w-5xl py-6 sm:py-10">
+        <div class="grid gap-8 lg:grid-cols-[minmax(0,1fr)_300px] lg:gap-10">
             <article class="prose-guide min-w-0">
                 @yield('guide-body')
             </article>
@@ -45,18 +48,18 @@
     </section>
 
     <section class="border-t border-line bg-white">
-        <div class="container-page max-w-5xl py-10">
-            <div class="eyebrow">Continue a ler</div>
-            <div class="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <div class="container-page max-w-5xl py-8 sm:py-10">
+            <h2 class="text-lg font-semibold">Continue a ler</h2>
+            <div class="mt-3 grid gap-2 sm:grid-cols-2 sm:gap-3">
                 @foreach (array_slice($otherGuides, 0, 4) as $guide)
                     <a href="{{ url($guide['url']) }}" class="link-row">
                         <span class="flex items-center gap-3">
-                            <span class="icon-tile !h-8 !w-8 {{ $guide['tone'] ? 'icon-tile-' . $guide['tone'] : '' }}">
-                                <x-icon :name="$guide['icon']" :size="16" />
+                            <span class="icon-tile !h-9 !w-9 {{ $guide['tone'] ? 'icon-tile-' . $guide['tone'] : '' }}">
+                                <x-icon :name="$guide['icon']" :size="18" />
                             </span>
                             {{ $guide['title'] }}
                         </span>
-                        <x-icon name="arrow-right" :size="14" class="text-muted" />
+                        <x-icon name="chevron-right" :size="16" class="shrink-0 text-muted" />
                     </a>
                 @endforeach
             </div>

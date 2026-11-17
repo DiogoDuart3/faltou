@@ -592,7 +592,7 @@ const initReportMaps = () => {
             }
             element.textContent = '';
             const scope = element.dataset.mapScope || 'all';
-            const map = window.L.map(element, { zoomControl: false, scrollWheelZoom: false }).setView(
+            const map = window.L.map(element, { scrollWheelZoom: false }).setView(
                 [DEFAULT_CENTER.lat, DEFAULT_CENTER.lng],
                 6
             );
@@ -639,7 +639,10 @@ const refreshReportMaps = async () => {
         const waterReports = await hydrateReports('water', getStoredReports('water'));
         const allReports = [...powerReports, ...waterReports];
 
-        reportMapRegistry.forEach(({ map, layer, scope }) => {
+        reportMapRegistry.forEach((entry) => {
+            const { map, layer, scope } = entry;
+            // A picker map keeps the view the person chose once a location is set.
+            const keepView = entry.picker && entry.locked;
             layer.clearLayers();
             let reports = allReports;
             if (scope === 'power') {
@@ -649,7 +652,9 @@ const refreshReportMaps = async () => {
             }
 
             if (!reports.length) {
-                map.setView([DEFAULT_CENTER.lat, DEFAULT_CENTER.lng], 6);
+                if (!keepView) {
+                    map.setView([DEFAULT_CENTER.lat, DEFAULT_CENTER.lng], 6);
+                }
                 return;
             }
 
@@ -669,7 +674,8 @@ const refreshReportMaps = async () => {
                     fillColor: color,
                     fillOpacity: 1,
                     weight: 2.5,
-                    className: 'map-marker-vibrant'
+                    className: 'map-marker-vibrant',
+                    bubblingMouseEvents: false,
                 });
 
                 marker.bindPopup(createPopupContent(report));
@@ -685,7 +691,7 @@ const refreshReportMaps = async () => {
                 }
             }
 
-            if (bounds.length) {
+            if (bounds.length && !keepView) {
                 map.fitBounds(bounds, { padding: [40, 40], maxZoom: 12 });
             }
         });
@@ -709,6 +715,7 @@ const updateCounts = () => {
 };
 
 const updateConnectionState = () => {
+    document.documentElement.dataset.online = navigator.onLine ? 'true' : 'false';
     const text = document.querySelector('[data-connection-text]');
     if (!text) {
         return;
@@ -814,8 +821,15 @@ const setupOutagePage = () => {
             locationStatus.textContent = 'Localização definida. A obter localidade...';
         }
         locationStatusBox?.classList.add('is-set');
+        if (status?.classList.contains('is-error')) {
+            setStatus(status, '');
+        }
         updateLocality(lat, lng);
         if (mapInstance) {
+            const entry = reportMapRegistry.get(mapElement);
+            if (entry) {
+                entry.locked = true;
+            }
             const position = [lat, lng];
             if (!marker) {
                 marker = window.L.circleMarker(position, {
@@ -838,14 +852,19 @@ const setupOutagePage = () => {
             return;
         }
         mapElement.textContent = '';
-        mapInstance = window.L.map(mapElement, { zoomControl: false }).setView(
-            [DEFAULT_CENTER.lat, DEFAULT_CENTER.lng],
-            6
-        );
+        mapInstance = window.L.map(mapElement, { scrollWheelZoom: false }).setView([DEFAULT_CENTER.lat, DEFAULT_CENTER.lng], 6);
         window.L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             maxZoom: 17,
             attribution: '&copy; OpenStreetMap contributors',
         }).addTo(mapInstance);
+
+        // Show other people's reports on the same map used to pick the location.
+        const layer = window.L.markerClusterGroup
+            ? window.L.markerClusterGroup({ showCoverageOnHover: false, maxClusterRadius: 50 })
+            : window.L.layerGroup();
+        layer.addTo(mapInstance);
+        reportMapRegistry.set(mapElement, { map: mapInstance, layer, scope: type, picker: true, locked: false });
+        refreshReportMaps();
 
         mapInstance.on('click', (event) => {
             setLocation(event.latlng.lat, event.latlng.lng, 'map');
@@ -901,15 +920,18 @@ const setupOutagePage = () => {
             if (locationStatus) {
                 locationStatus.textContent = 'A obter localização...';
             }
+            useLocationButton.disabled = true;
             navigator.geolocation.getCurrentPosition(
                 (position) => {
+                    useLocationButton.disabled = false;
                     setLocation(position.coords.latitude, position.coords.longitude, 'gps');
                     track('location_gps', { type, success: true });
                 },
                 () => {
+                    useLocationButton.disabled = false;
                     track('location_gps', { type, success: false });
                     if (locationStatus) {
-                        locationStatus.textContent = 'Falha ao obter localização. Use o mapa manualmente.';
+                        locationStatus.textContent = 'Não foi possível obter a localização. Toque no mapa para marcar o local.';
                     }
                 },
                 { enableHighAccuracy: false, timeout: 8000, maximumAge: 600000 }
@@ -933,8 +955,9 @@ const setupOutagePage = () => {
             const lng = parseCoordinate(lngInput?.value ?? '');
             if (lat === null || lng === null) {
                 if (status) {
-                    setStatus(status, 'Defina uma localização antes de publicar o aviso.', 'error');
+                    setStatus(status, 'Falta a localização: use o GPS ou toque no mapa.', 'error');
                 }
+                (mapElement ?? form).scrollIntoView({ behavior: 'smooth', block: 'center' });
                 if (submitBtn) {
                     submitBtn.disabled = false;
                     submitBtn.textContent = originalBtnText;
@@ -1063,13 +1086,11 @@ const setupOutagePage = () => {
     if (commentForm) {
         commentForm.addEventListener('submit', async (event) => {
             const submitBtn = commentForm.querySelector('button[type="submit"]');
-            const originalBtnText = submitBtn ? submitBtn.textContent : '';
 
             event.preventDefault();
 
             if (submitBtn) {
                 submitBtn.disabled = true;
-                submitBtn.textContent = 'A enviar...';
             }
 
             const commentText = page.querySelector('[data-comment-text]');
@@ -1080,7 +1101,6 @@ const setupOutagePage = () => {
                 }
                 if (submitBtn) {
                     submitBtn.disabled = false;
-                    submitBtn.textContent = originalBtnText;
                 }
                 return;
             }
@@ -1090,7 +1110,6 @@ const setupOutagePage = () => {
                 }
                 if (submitBtn) {
                     submitBtn.disabled = false;
-                    submitBtn.textContent = originalBtnText;
                 }
                 return;
             }
@@ -1154,7 +1173,6 @@ const setupOutagePage = () => {
                 }
                 if (submitBtn) {
                     submitBtn.disabled = false;
-                    submitBtn.textContent = originalBtnText;
                 }
                 return;
             }
@@ -1170,7 +1188,6 @@ const setupOutagePage = () => {
             }
             if (submitBtn) {
                 submitBtn.disabled = false;
-                submitBtn.textContent = originalBtnText;
             }
             await refreshComments();
         });
@@ -1223,8 +1240,9 @@ const setupChecklist = () => {
 const setupDropdowns = () => {
     const dropdowns = document.querySelectorAll('[data-dropdown]');
     document.addEventListener('click', (event) => {
+        const closer = event.target.closest('[data-dropdown-close]');
         dropdowns.forEach((dropdown) => {
-            if (dropdown.open && !dropdown.contains(event.target)) {
+            if (dropdown.open && (!dropdown.contains(event.target) || (closer && dropdown.contains(closer)))) {
                 dropdown.open = false;
             }
         });
@@ -1235,6 +1253,21 @@ const setupDropdowns = () => {
                 dropdown.open = false;
             });
         }
+    });
+};
+
+const setupTabs = () => {
+    document.querySelectorAll('[data-tabs]').forEach((root) => {
+        const tabs = [...root.querySelectorAll('[data-tab]')];
+        const panels = [...root.querySelectorAll('[data-tab-panel]')];
+        tabs.forEach((tab) => {
+            tab.addEventListener('click', () => {
+                tabs.forEach((t) => t.setAttribute('aria-selected', t === tab ? 'true' : 'false'));
+                panels.forEach((panel) => {
+                    panel.hidden = panel.dataset.tabPanel !== tab.dataset.tab;
+                });
+            });
+        });
     });
 };
 
@@ -1250,6 +1283,7 @@ const registerServiceWorker = () => {
 updateCounts();
 updateConnectionState();
 setupDropdowns();
+setupTabs();
 setupCharCounters();
 setupChecklist();
 setupFeedFilters();

@@ -128,11 +128,11 @@
     <div class="card">
         <div class="card-title">Contactos de emergência</div>
         <div class="mt-4 space-y-3">
-            <a href="tel:800506506" class="flex items-center justify-between gap-3 rounded-xl bg-porcelain px-3 py-2.5 hover:bg-stone">
+            <a href="tel:800506506" class="flex min-h-12 items-center justify-between gap-3 rounded-xl bg-porcelain px-3 py-2.5 hover:bg-stone">
                 <span class="text-sm"><span class="block font-medium">Avarias Elétricas (E-Redes)</span><span class="text-muted">800 506 506</span></span>
                 <x-icon name="phone" :size="16" class="text-muted" />
             </a>
-            <a href="tel:112" class="flex items-center justify-between gap-3 rounded-xl bg-porcelain px-3 py-2.5 hover:bg-stone">
+            <a href="tel:112" class="flex min-h-12 items-center justify-between gap-3 rounded-xl bg-porcelain px-3 py-2.5 hover:bg-stone">
                 <span class="text-sm"><span class="block font-medium">Emergência Nacional</span><span class="text-muted">112</span></span>
                 <x-icon name="phone" :size="16" class="text-muted" />
             </a>

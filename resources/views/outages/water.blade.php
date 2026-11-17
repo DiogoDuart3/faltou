@@ -2,7 +2,6 @@
 
 @section('title', 'Falta de água - Faltou Portugal')
 @section('description', 'Relate falhas de água com localização rápida e comentários da comunidade.')
-@section('hide-mobile-cta', '1')
 
 @include('partials.leaflet')
 

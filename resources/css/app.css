@@ -19,12 +19,13 @@
 
     /* Accents */
     --color-ember: #e8590c;
+    --color-ember-strong: #c2410c;
     --color-ember-soft: #fff1e8;
     --color-river: #0b7285;
     --color-river-soft: #e6f4f6;
     --color-sand: #f0b429;
     --color-sand-soft: #fff7e0;
-    --color-success: #1f8a4c;
+    --color-success: #1a7741;
     --color-danger: #c92a2a;
 
     --shadow-soft: 0 1px 2px rgb(21 23 28 / 0.04), 0 4px 16px -4px rgb(21 23 28 / 0.08);
@@ -32,9 +33,17 @@
 }
 
 @layer base {
+    :root {
+        /* Height of the fixed bottom tab bar (phones and tablets). */
+        --tabbar-h: calc(3.75rem + env(safe-area-inset-bottom, 0px));
+    }
+
     html {
         scroll-behavior: smooth;
+        scroll-padding-top: 5rem;
         -webkit-tap-highlight-color: transparent;
+        -webkit-text-size-adjust: 100%;
+        text-size-adjust: 100%;
     }
 
     body {
@@ -71,7 +80,7 @@
 
     /* Buttons */
     .btn {
-        @apply inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition duration-150 select-none;
+        @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-center text-sm leading-tight font-semibold transition duration-150 select-none;
     }
 
     .btn:disabled {
@@ -83,7 +92,7 @@
     }
 
     .btn-lg {
-        @apply px-5 py-3 text-[15px];
+        @apply min-h-[3.25rem] px-5 py-3 text-base;
     }
 
     .btn-primary {
@@ -99,16 +108,16 @@
     }
 
     .btn-power {
-        @apply bg-ember text-white shadow-sm shadow-ember/30 hover:bg-ember/90;
+        @apply bg-ember-strong text-white shadow-sm shadow-ember/30 hover:bg-[#a8380a];
     }
 
     .btn-water {
-        @apply bg-river text-white shadow-sm shadow-river/30 hover:bg-river/90;
+        @apply bg-river text-white shadow-sm shadow-river/30 hover:bg-[#095f6f];
     }
 
     /* Navigation */
     .nav-link {
-        @apply rounded-lg px-3 py-2 text-sm font-medium text-muted transition hover:bg-stone hover:text-ink;
+        @apply inline-flex min-h-10 items-center rounded-lg px-3 py-2 text-sm font-medium text-muted transition hover:bg-stone hover:text-ink;
     }
 
     .nav-link[aria-current='page'] {
@@ -116,11 +125,102 @@
     }
 
     .mobile-nav-link {
-        @apply flex items-center gap-3 rounded-xl px-3 py-3 text-[15px] font-medium text-ink transition hover:bg-stone;
+        @apply flex min-h-12 items-center gap-3 rounded-xl px-3 py-2.5 text-base font-medium text-ink transition hover:bg-stone;
+    }
+
+    /* Bottom tab bar (below lg) */
+    .tabbar {
+        @apply fixed inset-x-0 bottom-0 z-40 border-t border-line bg-white lg:hidden;
+        height: var(--tabbar-h);
+        padding-bottom: env(safe-area-inset-bottom, 0px);
+    }
+
+    .tabbar-item {
+        @apply flex h-full w-full cursor-pointer list-none flex-col items-center justify-center gap-1 text-xs font-medium text-muted transition select-none;
+    }
+
+    .tabbar-item::-webkit-details-marker {
+        display: none;
+    }
+
+    .tabbar-item[aria-current='page'],
+    details[open] > .tabbar-item {
+        @apply font-semibold text-ink;
+    }
+
+    .tabbar-item-power[aria-current='page'] {
+        @apply text-ember-strong;
+    }
+
+    .tabbar-item-water[aria-current='page'] {
+        @apply text-river;
+    }
+
+    .sheet-backdrop {
+        @apply fixed inset-x-0 top-0 bg-ink/40;
+        bottom: var(--tabbar-h);
+    }
+
+    .sheet {
+        @apply fixed inset-x-0 max-h-[75dvh] overflow-y-auto rounded-t-3xl border-t border-line bg-white px-4 pt-3 pb-5;
+        bottom: var(--tabbar-h);
+        box-shadow: var(--shadow-lift);
+        animation: sheet-in 0.18s ease-out;
+    }
+
+    .sheet-handle {
+        @apply mx-auto mb-3 h-1 w-10 rounded-full bg-line;
+    }
+
+    /* Whole-app offline notice; shown when <html data-online="false"> */
+    .offline-banner {
+        @apply hidden border-b border-sand/40 bg-sand-soft text-sm font-medium text-[#6b4500];
+    }
+
+    html[data-online='false'] .offline-banner {
+        @apply block;
+    }
+
+    /* Space reserved at the page end so the tab bar never covers content */
+    .tabbar-spacer {
+        @apply lg:hidden;
+        height: var(--tabbar-h);
+    }
+
+    /* Submit area that stays reachable above the tab bar while its form is on screen */
+    .sticky-submit {
+        @apply sticky z-10 -mx-5 -mb-5 rounded-b-2xl border-t border-line bg-white/95 px-5 py-3 backdrop-blur sm:-mx-6 sm:-mb-6 sm:px-6 lg:static lg:m-0 lg:border-t lg:bg-transparent lg:px-0 lg:pt-6 lg:pb-0 lg:backdrop-blur-none;
+        bottom: var(--tabbar-h);
+    }
+
+    /* Big report entry points (home) */
+    .report-cta {
+        @apply flex min-h-16 items-center gap-3 rounded-2xl px-4 py-3 text-left text-lg text-white shadow-sm transition active:translate-y-px;
+    }
+
+    .report-cta-power {
+        @apply bg-ember-strong shadow-ember/30 hover:bg-[#a8380a];
+    }
+
+    .report-cta-water {
+        @apply bg-river shadow-river/30 hover:bg-[#095f6f];
+    }
+
+    /* Tap-to-call rows */
+    .call-row {
+        @apply flex min-h-16 items-center justify-between gap-4 rounded-xl border border-line bg-white px-4 py-3 transition hover:border-ink/25;
+    }
+
+    .call-row-number {
+        @apply block text-xl font-semibold tracking-tight text-ink tabular-nums sm:text-2xl;
+    }
+
+    .call-row-action {
+        @apply inline-flex h-11 shrink-0 items-center gap-2 rounded-full bg-ink px-4 text-sm font-semibold text-white;
     }
 
     .footer-link {
-        @apply text-sm text-muted transition hover:text-ink;
+        @apply inline-flex min-h-9 items-center text-sm text-muted transition hover:text-ink;
     }
 
     /* Surfaces */
@@ -155,7 +255,7 @@
     }
 
     .pill-ember {
-        @apply border-ember/20 bg-ember-soft text-ember;
+        @apply border-ember/20 bg-ember-soft text-ember-strong;
     }
 
     .pill-river {
@@ -228,7 +328,7 @@
     }
 
     .input {
-        @apply w-full rounded-xl border border-line bg-white px-3.5 py-2.5 text-[15px] text-ink transition placeholder:text-muted/60 focus:border-ink/40 focus:ring-4 focus:ring-ink/5 focus:outline-none;
+        @apply min-h-11 w-full rounded-xl border border-line bg-white px-3.5 py-2.5 text-base text-ink transition placeholder:text-muted/70 focus:border-ink/40 focus:ring-4 focus:ring-ink/5 focus:outline-none;
     }
 
     textarea.input {
@@ -236,7 +336,7 @@
     }
 
     .choice {
-        @apply relative flex cursor-pointer items-center gap-2 rounded-xl border border-line bg-white px-3 py-2.5 text-sm font-medium text-ink transition hover:border-ink/25;
+        @apply relative flex min-h-12 cursor-pointer items-center justify-center gap-2 rounded-xl border border-line bg-white px-3 py-2.5 text-center text-sm leading-tight font-medium text-ink transition hover:border-ink/25;
     }
 
     .choice:has(input:checked) {
@@ -256,11 +356,11 @@
     }
 
     .step-title {
-        @apply text-[15px] font-semibold text-ink;
+        @apply text-base font-semibold text-ink;
     }
 
     .form-status {
-        @apply min-h-[1.25rem] text-sm text-muted;
+        @apply text-sm text-muted empty:hidden;
     }
 
     .form-status.is-error {
@@ -276,20 +376,20 @@
     }
 
     .location-status {
-        @apply flex items-center gap-2 rounded-xl border border-dashed border-line bg-porcelain px-3 py-2.5 text-sm text-muted;
+        @apply flex min-h-11 items-center gap-2 rounded-xl border border-dashed border-line bg-porcelain px-3 py-2.5 text-sm text-muted;
     }
 
     .location-status.is-set {
-        @apply border-solid border-success/30 bg-success/5 text-ink;
+        @apply border-solid border-success/40 bg-success/5 font-medium text-ink;
     }
 
     /* Maps */
     .map-shell {
-        @apply overflow-hidden rounded-xl border border-line bg-stone;
+        @apply relative overflow-hidden rounded-2xl border border-line bg-stone;
     }
 
     .map {
-        @apply relative z-0 flex h-64 w-full items-center justify-center text-sm text-muted;
+        @apply relative z-0 flex h-64 w-full items-center justify-center text-sm text-muted sm:h-80;
     }
 
     .map--lg {
@@ -297,7 +397,7 @@
     }
 
     .map--xl {
-        @apply h-[22rem] sm:h-[28rem];
+        @apply h-[19rem] sm:h-[26rem] lg:h-full lg:min-h-[30rem];
     }
 
     .map-legend {
@@ -358,8 +458,16 @@
         @apply inline-flex rounded-xl border border-line bg-stone p-1;
     }
 
+    .tabs-full {
+        @apply flex w-full;
+    }
+
+    .tabs-full .tab {
+        @apply flex-1;
+    }
+
     .tab {
-        @apply rounded-lg px-3 py-1.5 text-sm font-medium text-muted transition hover:text-ink;
+        @apply inline-flex min-h-9 items-center justify-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium whitespace-nowrap text-muted transition hover:text-ink;
     }
 
     .tab[aria-selected='true'] {
@@ -385,11 +493,11 @@
 
     /* Articles / guides */
     .prose-guide {
-        @apply space-y-10 text-[17px] leading-relaxed text-ink/80;
+        @apply space-y-8 text-base leading-relaxed text-ink/80 sm:space-y-10 sm:text-[17px];
     }
 
     .prose-guide h2 {
-        @apply mb-3 text-2xl font-semibold text-ink;
+        @apply mb-2 text-xl leading-snug font-semibold text-ink sm:mb-3 sm:text-2xl;
     }
 
     .prose-guide h3 {
@@ -413,7 +521,7 @@
         @apply absolute top-[0.7em] left-1.5 h-1.5 w-1.5 rounded-full bg-ink/30;
     }
 
-    .prose-guide a:not(.btn):not(.link-row) {
+    .prose-guide a:not(.btn):not(.link-row):not(.call-row) {
         @apply font-medium text-river underline decoration-river/30 underline-offset-2 hover:decoration-river;
     }
 
@@ -422,15 +530,19 @@
     }
 
     .guide-step {
-        @apply flex gap-4;
+        @apply flex gap-3 sm:gap-4;
+    }
+
+    .guide-step > div {
+        @apply min-w-0;
     }
 
     .guide-step-number {
-        @apply mt-1 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-line bg-white text-sm font-semibold text-ink;
+        @apply inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-ink text-sm font-semibold text-white;
     }
 
     .callout {
-        @apply rounded-2xl border p-5 text-base;
+        @apply rounded-2xl border p-4 text-base sm:p-5;
     }
 
     .callout-sand {
@@ -446,7 +558,7 @@
     }
 
     .link-row {
-        @apply flex items-center justify-between gap-3 rounded-xl border border-line bg-white px-4 py-3 text-sm font-medium text-ink transition hover:border-ink/25;
+        @apply flex min-h-12 items-center justify-between gap-3 rounded-xl border border-line bg-white px-4 py-3 text-sm font-medium text-ink transition hover:border-ink/25;
     }
 
     /* Toast */
@@ -474,6 +586,19 @@
     .leaflet-popup-content {
         margin: 12px 14px !important;
         line-height: 1.45 !important;
+    }
+
+    .leaflet-bar {
+        border: 1px solid var(--color-line) !important;
+        box-shadow: var(--shadow-soft) !important;
+        @apply !overflow-hidden !rounded-xl;
+    }
+
+    .leaflet-bar a {
+        width: 40px !important;
+        height: 40px !important;
+        line-height: 40px !important;
+        color: var(--color-ink) !important;
     }
 
     .leaflet-control-attribution {
@@ -515,9 +640,6 @@
         mask-image: linear-gradient(to bottom, black 40%, transparent);
     }
 
-    .pb-safe {
-        padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
-    }
 }
 
 @keyframes live-ping {
@@ -525,6 +647,18 @@
     100% {
         transform: scale(2.4);
         opacity: 0;
+    }
+}
+
+@keyframes sheet-in {
+    from {
+        transform: translateY(16px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
     }
 }
 

@@ -68,7 +68,7 @@
         </ul>
     </div>
 
-    <div class="grid gap-6 sm:grid-cols-2">
+    <div class="grid gap-4 sm:grid-cols-2">
         <div class="card-flat">
             <span class="icon-tile icon-tile-ember"><x-icon name="zap" :size="18" /></span>
             <h2 class="mt-4 !text-lg">Para falhas de eletricidade</h2>
@@ -111,8 +111,8 @@
         </div>
         <div class="mt-4 space-y-1">
             @foreach (['Água (3 dias)', 'Lanterna + Pilhas', 'Power Bank', 'Conservas', 'Kit 1º Socorros'] as $i => $item)
-                <label class="flex cursor-pointer items-center gap-3 rounded-lg px-2 py-2 text-sm hover:bg-porcelain">
-                    <input type="checkbox" class="h-4 w-4 rounded border-line accent-ink" data-checklist-item="{{ $i }}">
+                <label class="flex min-h-11 cursor-pointer items-center gap-3 rounded-lg px-2 py-2 text-base hover:bg-porcelain">
+                    <input type="checkbox" class="h-5 w-5 shrink-0 rounded border-line accent-ink" data-checklist-item="{{ $i }}">
                     <span>{{ $item }}</span>
                 </label>
             @endforeach
@@ -122,13 +122,13 @@
     <div class="card">
         <div class="card-title">Links úteis</div>
         <div class="mt-3 space-y-1 text-sm">
-            <a href="https://prociv.gov.pt/" target="_blank" rel="noopener noreferrer" class="flex items-center justify-between rounded-lg px-2 py-2 font-medium hover:bg-porcelain">
+            <a href="https://prociv.gov.pt/" target="_blank" rel="noopener noreferrer" class="flex items-center justify-between min-h-11 rounded-lg px-2 py-2 font-medium hover:bg-porcelain">
                 Proteção Civil <x-icon name="external" :size="14" class="text-muted" />
             </a>
-            <a href="{{ url('/guia-falta-eletricidade') }}" class="flex items-center justify-between rounded-lg px-2 py-2 font-medium hover:bg-porcelain">
+            <a href="{{ url('/guia-falta-eletricidade') }}" class="flex items-center justify-between min-h-11 rounded-lg px-2 py-2 font-medium hover:bg-porcelain">
                 Guia Falta de Luz <x-icon name="arrow-right" :size="14" class="text-muted" />
             </a>
-            <a href="{{ url('/guia-falta-agua') }}" class="flex items-center justify-between rounded-lg px-2 py-2 font-medium hover:bg-porcelain">
+            <a href="{{ url('/guia-falta-agua') }}" class="flex items-center justify-between min-h-11 rounded-lg px-2 py-2 font-medium hover:bg-porcelain">
                 Guia Falta de Água <x-icon name="arrow-right" :size="14" class="text-muted" />
             </a>
         </div>
