@@ -68,7 +68,7 @@
             </div>
         </div>
 
-        <div id="mapa" class="mt-5 grid scroll-mt-20 gap-4 lg:mt-6 lg:h-[34rem] lg:grid-cols-[1.6fr_1fr]">
+        <div id="mapa" class="mt-5 grid grid-cols-1 scroll-mt-20 gap-4 lg:mt-6 lg:h-[34rem] lg:grid-cols-[1.6fr_1fr]">
             <div class="flex min-h-0 flex-col gap-2">
                 <div class="map-shell min-h-0 flex-1">
                     <div class="map map--xl" data-report-map data-map-scope="all">A carregar mapa...</div>

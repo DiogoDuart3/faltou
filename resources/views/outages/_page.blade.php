@@ -17,7 +17,7 @@
         </div>
     </div>
 
-    <div class="mt-5 grid items-start gap-5 sm:mt-6 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)] lg:gap-6">
+    <div class="mt-5 grid grid-cols-1 items-start gap-5 sm:mt-6 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)] lg:gap-6">
 
         {{-- Report form --}}
         <form class="card space-y-6 lg:sticky lg:top-24" data-report-form novalidate>

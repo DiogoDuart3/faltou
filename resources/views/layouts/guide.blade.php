@@ -36,7 +36,7 @@
     </section>
 
     <section class="container-page max-w-5xl py-6 sm:py-10">
-        <div class="grid gap-8 lg:grid-cols-[minmax(0,1fr)_300px] lg:gap-10">
+        <div class="grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,1fr)_300px] lg:gap-10">
             <article class="prose-guide min-w-0">
                 @yield('guide-body')
             </article>

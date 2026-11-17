@@ -47,6 +47,8 @@
     }
 
     body {
+        /* Safety net: nothing may ever widen the page sideways on phones. */
+        overflow-x: clip;
         font-family: var(--font-sans);
         font-feature-settings: 'cv11', 'ss01';
         line-height: 1.6;
