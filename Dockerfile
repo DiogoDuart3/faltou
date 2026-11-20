@@ -1,5 +1,7 @@
 # syntax=docker/dockerfile:1
-FROM composer:2 AS vendor
+# composer:2 floats to the newest PHP (8.6 broke installs); build deps on the runtime PHP line.
+FROM serversideup/php:8.4-cli@sha256:5110afeb3bf2e6fc1f91247f52ed2c9df3df5bcd20c65645f2c3290ad4a92c6c AS vendor
+USER root
 WORKDIR /app
 COPY composer.json composer.lock ./
 RUN composer install --no-dev --no-scripts --no-autoloader --prefer-dist --no-interaction
