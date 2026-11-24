@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 # composer:2 floats to the newest PHP (8.6 broke installs); build deps on the runtime PHP line.
-FROM serversideup/php:8.4-cli@sha256:5110afeb3bf2e6fc1f91247f52ed2c9df3df5bcd20c65645f2c3290ad4a92c6c AS vendor
+FROM serversideup/php:8.4-cli@sha256:ef15f5a4ea9c07405faf2d204727a1191845a609b5477edfcad0a426f49aabb7 AS vendor
 USER root
 WORKDIR /app
 COPY composer.json composer.lock ./
@@ -15,7 +15,7 @@ RUN npm ci --no-audit --no-fund
 COPY . ./
 RUN npm run build
 
-FROM serversideup/php:8.4-fpm-nginx@sha256:a9152816e2a652b75bd68c3ed3621d2b6188d82d4d7ecae93660a3057136ba24
+FROM serversideup/php:8.4-fpm-nginx@sha256:d4cd2a7303b9f62afc88729f3f3259b87e19c8027502951164bcb26362296a86
 ENV APP_BASE_DIR=/var/www/html \
     AUTORUN_ENABLED=false \
     PHP_OPCACHE_ENABLE=1
